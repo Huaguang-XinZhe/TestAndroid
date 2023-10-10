@@ -16,6 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import java.time.LocalDateTime
 
 
 @Composable
@@ -60,7 +61,7 @@ fun Label(
 @Composable
 fun TimeLabel(
     modifier: Modifier = Modifier,
-    text: String,
+    time: LocalDateTime,
     onSelected: () -> Unit
 ) {
     val interactionSource = remember { MutableInteractionSource() }
@@ -81,7 +82,7 @@ fun TimeLabel(
             .padding(horizontal = 3.dp) // 可以根据需要调整这个值
     ) {
         Text(
-            text = text,
+            text = time.format(),
             color = MaterialTheme.colorScheme.primary,
             fontSize = 12.sp
         )

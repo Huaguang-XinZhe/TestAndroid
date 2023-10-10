@@ -16,7 +16,13 @@ data class ChainEvent(
 data class InternalEvent(
     val name: String,
     val duration: Duration? = null,
-    val remark: String = "",
+    val remark: String? = null,
     val tag: String? = null,
+    val type: EventType = EventType.ADD
 )
+
+enum class EventType {
+    ADD,
+    INSERT,
+}
 
