@@ -14,15 +14,16 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import java.time.LocalDateTime
 
-
 @Composable
 fun Label(
     modifier: Modifier = Modifier,
-    type: LabelType
+    type: LabelType,
+    onClick: () -> Unit
 ) {
     type.apply {
 
@@ -55,6 +56,7 @@ fun Label(
     }
 }
 
+
 /**
  * 这个具象标签能不能合并到上边呢？
  */
@@ -62,6 +64,7 @@ fun Label(
 fun TimeLabel(
     modifier: Modifier = Modifier,
     time: LocalDateTime,
+    textSize: TextUnit = 15.sp,
     onSelected: () -> Unit
 ) {
     val interactionSource = remember { MutableInteractionSource() }
@@ -84,7 +87,7 @@ fun TimeLabel(
         Text(
             text = time.format(),
             color = MaterialTheme.colorScheme.primary,
-            fontSize = 12.sp
+            fontSize = textSize
         )
     }
 

@@ -23,8 +23,6 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.*
 import kotlinx.coroutines.launch
 
-const val TAG = "TabRow"
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TabLayoutExample() {
@@ -114,7 +112,7 @@ fun MyTabRow(
     }
 }
 
-// TODO: 这个 Composable 还有问题，标题会被压缩，而且不能滑动。 
+// TODO: 这个 Composable 还有问题，标题会被压缩，而且不能滑动。
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun MyTabRowWithPager(

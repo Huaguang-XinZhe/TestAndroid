@@ -17,13 +17,10 @@ sealed class LabelType(
     val horizontalPadding: Dp,
     val verticalPadding: Dp,
     val displayText: String,
-    open val onClick: () -> Unit,
     val isDashBorder: Boolean = false,
 ) {
     // 匿名内部类不能有参数，这里必须用 class 或 data class
-    class Default(
-        override val onClick: () -> Unit,
-    ) : LabelType(
+    object Add : LabelType(
         shape = CircleShape,
         borderColor = Primary, // TODO: 这里写死了，该如何应用主题呢？
         bgColor = Primary.copy(alpha = 0.1f),
@@ -31,13 +28,11 @@ sealed class LabelType(
         horizontalPadding = 15.dp,
         verticalPadding = 1.dp,
         displayText = "+",
-        onClick = onClick,
         isDashBorder = true,
     )
 
     data class Category(
         val name: String,
-        override val onClick: () -> Unit,
     ) : LabelType(
         shape = CircleShape,
         borderColor = Color.Transparent,
@@ -46,12 +41,10 @@ sealed class LabelType(
         horizontalPadding = 6.dp,
         verticalPadding = 3.dp,
         displayText = "@$name",
-        onClick = onClick
     )
 
     data class Tag(
         val name: String,
-        override val onClick: () -> Unit,
     ) : LabelType(
         shape = RoundedCornerShape(4.dp),
         borderColor = Color.DarkGray,
@@ -60,6 +53,5 @@ sealed class LabelType(
         horizontalPadding = 3.dp,
         verticalPadding = 0.dp,
         displayText = "#$name",
-        onClick = onClick
     )
 }
