@@ -63,10 +63,12 @@ fun Label(
 @Composable
 fun TimeLabel(
     modifier: Modifier = Modifier,
-    time: LocalDateTime,
+    time: LocalDateTime?,
     textSize: TextUnit = 16.sp,
     onSelected: () -> Unit
 ) {
+    if (time == null) return
+
     val interactionSource = remember { MutableInteractionSource() }
     val shape = RoundedCornerShape(4.dp)
     val borderColor = MaterialTheme.colorScheme.primary

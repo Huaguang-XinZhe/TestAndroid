@@ -2,6 +2,7 @@ package com.huaguang.testandroid
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -32,56 +33,40 @@ import java.time.LocalDateTime
 @Composable
 fun ExploratoryRecordItem(
     chainEvent: ChainEvent,
+    modifier: Modifier = Modifier,
 ) {
     chainEvent.apply {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier
+            modifier = modifier
                 .padding(10.dp)
                 .fillMaxWidth()
         ) {
             TimeLabel(
-                time = mainStart,
+                time = mainEvent.startTime,
             ) {  }
-
             VerticalLine()
 
-            childEvents.forEach { internalEvent ->
+            InternalColumn(event = mainEvent)
+
+            childEvents.forEachIndexed { index, internalEvent ->
                 InternalColumn(event = internalEvent)
-                VerticalLine()
-////                SupplementButton()
-//                TimeLabel(
-//                    time = mainStart,
-//                    textSize = 12.sp,
-//                ) {
+
+//                IntervalDisplayButton(interval = 23) {
 //
 //                }
 //                VerticalLine()
-////                SupplementButton()
-//                TimeLabel(
-//                    time = mainStart,
-//                    textSize = 12.sp,
-//                ) {
-//
-//                }
-                IntervalDisplayButton(interval = 23) {
-
-                }
-
-                VerticalLine()
             }
 
-            if (mainEnd != null) {
-                TimeLabel(
-                    time = mainEnd,
-                ) {  }
-            }
+            TimeLabel(
+                time = mainEvent.endTime,
+            ) {  }
         }
     }
 }
 
 @Composable
-fun InternalColumn(
+fun ColumnScope.InternalColumn(
     event: InternalEvent,
 ) {
     event.apply {
@@ -91,7 +76,13 @@ fun InternalColumn(
             EventType.ADD -> RecordItemStyle.Add
             EventType.INSERT -> RecordItemStyle.Insert
         }
-        
+        val isMain = event.type == EventType.MAIN
+
+        TimeLabelWithLine(
+            time = startTime,
+            isMain = isMain
+        )
+
         // Card 的内 padding 没有效果，内 padding 也是外 padding
         OutlinedCard {
             val nameBottomPadding = if (remark == null && label == null) 10.dp else 2.dp
@@ -116,6 +107,14 @@ fun InternalColumn(
                 // TODO: 标签点击，可能是类属，也可能是 tag 
             }
         }
+
+        VerticalLine()
+
+        TimeLabelWithLine(
+            time = endTime,
+            isMain = isMain
+        )
+
     }
 }
 
@@ -242,6 +241,23 @@ fun SupplementButton(show: Boolean = true) {
 
 }
 
+@Composable
+fun ColumnScope.TimeLabelWithLine(
+    time: LocalDateTime?,
+    isMain: Boolean = false,
+) {
+    if (isMain) return
+
+    TimeLabel(
+        time = time,
+        textSize = 12.sp
+    ) {
+        // TODO:
+    }
+
+    VerticalLine()
+}
+
 @Preview(showBackground = true)
 @Composable
 fun ExploratoryRecordItemTest() {
@@ -251,6 +267,8 @@ fun ExploratoryRecordItemTest() {
         remark = "在,说, 随机一段废话对我的意义x不仅仅是一个重大的",
         type = EventType.MAIN,
         label = "当前核心",
+        startTime = LocalDateTime.now(),
+        endTime = LocalDateTime.now()
     )
 
     // TODO: 有没有工具能够根据数据结构自动生成假数据（创建对象的代码）？
@@ -285,14 +303,13 @@ fun ExploratoryRecordItemTest() {
         duration = Duration.ofMinutes(63),
         label = "核心",
         startTime = LocalDateTime.now(),
+        endTime = LocalDateTime.now()
     )
 
     val chainEvent = ChainEvent(
-        mainStart = LocalDateTime.now(),
-        childEvents = listOf(internalEvent, ),
-//        mainEnd = LocalDateTime.now(),
+        mainEvent = internalEvent,
+        childEvents = listOf(internalEvent1, internalEvent2, internalEvent3, internalEvent4),
     )
-    // internalEvent1, internalEvent2, internalEvent3, internalEvent4
 
     ExploratoryRecordItem(chainEvent = chainEvent)
 
