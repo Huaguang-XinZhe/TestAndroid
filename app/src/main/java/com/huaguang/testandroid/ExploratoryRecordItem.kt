@@ -41,7 +41,7 @@ fun ExploratoryRecordItem(
                 .fillMaxWidth()
         ) {
             TimeLabel(
-                time = startTime,
+                time = mainStart,
             ) {  }
 
             VerticalLine()
@@ -49,11 +49,31 @@ fun ExploratoryRecordItem(
             childEvents.forEach { internalEvent ->
                 InternalColumn(event = internalEvent)
                 VerticalLine()
+////                SupplementButton()
+//                TimeLabel(
+//                    time = mainStart,
+//                    textSize = 12.sp,
+//                ) {
+//
+//                }
+//                VerticalLine()
+////                SupplementButton()
+//                TimeLabel(
+//                    time = mainStart,
+//                    textSize = 12.sp,
+//                ) {
+//
+//                }
+                IntervalDisplayButton(interval = 23) {
+
+                }
+
+                VerticalLine()
             }
 
-            if (endTime != null) {
+            if (mainEnd != null) {
                 TimeLabel(
-                    time = endTime,
+                    time = mainEnd,
                 ) {  }
             }
         }
@@ -112,7 +132,9 @@ fun NameRow(
                     Icon(
                         painter = painterResource(id = iconRes),
                         contentDescription = null,
-                        modifier = Modifier.size(iconSize).padding(top = iconTopPadding),
+                        modifier = Modifier
+                            .size(iconSize)
+                            .padding(top = iconTopPadding),
                         tint = MaterialTheme.colorScheme.primary
                     )
                 },
@@ -165,6 +187,7 @@ fun InternalRemark(
         Text(
             text = text,
             fontSize = 12.sp,
+            color = Color.DarkGray,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
             modifier = Modifier.padding(horizontal = 5.dp, vertical = 2.dp)
@@ -201,6 +224,23 @@ fun VerticalLine() {
     )
 }
 
+/**
+ * 用于补充记录的按钮，可支持点击和长按两种操作
+ */
+@Composable
+fun SupplementButton(show: Boolean = true) {
+    if (!show) return
+
+    LongPressOutlinedIconButton(
+        onClick = {
+
+        },
+        onLongClick = {
+
+        }
+    )
+
+}
 
 @Preview(showBackground = true)
 @Composable
@@ -210,7 +250,7 @@ fun ExploratoryRecordItemTest() {
         name = "贵州省毕节市赫章县水塘堡彝族苗族乡",
         remark = "在,说, 随机一段废话对我的意义x不仅仅是一个重大的",
         type = EventType.MAIN,
-        label = "当前核心"
+        label = "当前核心",
     )
 
     // TODO: 有没有工具能够根据数据结构自动生成假数据（创建对象的代码）？
@@ -218,34 +258,41 @@ fun ExploratoryRecordItemTest() {
         name = "敏而好学，不耻下问",
         duration = Duration.ofMinutes(183),
         remark = "河北工商大学",
-        label = "探索"
+        label = "探索",
+        startTime = LocalDateTime.now(),
+        endTime = LocalDateTime.now()
     )
 
     val internalEvent2 = InternalEvent(
         name = "森森的33.190.80.243",
         type = EventType.INSERT,
-        duration = Duration.ofMinutes(12)
+        duration = Duration.ofMinutes(12),
+        startTime = LocalDateTime.now(),
+        endTime = LocalDateTime.now()
     )
 
     val internalEvent3 = InternalEvent(
         name = "广西壮族自治区南宁市隆安县城厢镇",
         duration = Duration.ofMinutes(23),
         remark = "了解清楚随机一段废话到底是一种怎么样的存在,说, 随机一段废话对我的意义x不仅仅是一个重大的事件，还可能会改变我的人生.",
-        label = "当前核心"
+        label = "当前核心",
+        startTime = LocalDateTime.now(),
+        endTime = LocalDateTime.now()
     )
 
     val internalEvent4 = InternalEvent(
         name = "a14f@sgf11zp.com",
         duration = Duration.ofMinutes(63),
-        label = "核心"
+        label = "核心",
+        startTime = LocalDateTime.now(),
     )
 
     val chainEvent = ChainEvent(
-        startTime = LocalDateTime.now(),
-        childEvents = listOf(internalEvent, internalEvent1, internalEvent2, internalEvent3, internalEvent4),
-        endTime = LocalDateTime.now(),
-        category = "时光流开发",
+        mainStart = LocalDateTime.now(),
+        childEvents = listOf(internalEvent, ),
+//        mainEnd = LocalDateTime.now(),
     )
+    // internalEvent1, internalEvent2, internalEvent3, internalEvent4
 
     ExploratoryRecordItem(chainEvent = chainEvent)
 

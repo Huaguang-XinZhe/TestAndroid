@@ -9,7 +9,7 @@ import androidx.compose.ui.unit.sp
 
 sealed class RecordItemStyle(
     val iconSize: Dp = 15.dp,
-    val iconTopPadding: Dp = 0.5.dp,
+    val iconTopPadding: Dp = 1.dp,
     val nameSize: TextUnit = 17.sp,
     @DrawableRes val iconRes: Int = R.drawable.add,
     val isTag: Boolean = true

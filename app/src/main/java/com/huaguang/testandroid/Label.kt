@@ -64,7 +64,7 @@ fun Label(
 fun TimeLabel(
     modifier: Modifier = Modifier,
     time: LocalDateTime,
-    textSize: TextUnit = 15.sp,
+    textSize: TextUnit = 16.sp,
     onSelected: () -> Unit
 ) {
     val interactionSource = remember { MutableInteractionSource() }
