@@ -17,10 +17,12 @@ class ButtonsViewModel @Inject constructor(
     val cursor = pageState.currentType
 
     val events = mutableStateListOf<InternalEvent>()
+    var index = 0
 
     fun onMainStartClick() {
-        buttonsBarState.value = ButtonsBarState.AllDisplay
         inputState.show.value = true
+        buttonsBarState.value = ButtonsBarState.AllDisplay
+        cursor.value = CurrentType.MAIN
 
         // 测试……
         val internalEvent = InternalEvent(
@@ -31,58 +33,60 @@ class ButtonsViewModel @Inject constructor(
 
     }
 
-    fun undoButtonClick() {
-        TODO("Not yet implemented")
-    }
-
-    fun onAddButtonDoubleClick() {
-        // 下边的逻辑只会在 “新增结束” 下执行
-        buttonsBarState.value = ButtonsBarState.AddOverDisplay
-
-
-    }
-
-    fun onStopButtonClick() {
-        buttonsBarState.value = ButtonsBarState.Default
-
-
-        // 测试……
-        val internalEvent = events[0]
-        internalEvent.endTime = LocalDateTime.now()
-    }
-
-    fun onStopButtonDoubleClick() {
-        // 下边的逻辑只在 cursor.value == CurrentType.MAIN 下进行，为 null 的时候结束图标按钮根本不会显示；
-        // 也就是说下边的逻辑要处理的是当前主题事件的结束以及下一主题事件的开始
-        buttonsBarState.value = ButtonsBarState.AllDisplay
-    }
-
     fun onAddClick() {
-        ButtonsBarState.AddOverDisplay
+        inputState.show.value = true
+        internalItemState.apply {
+            intervalButtonShow.value = true
+            supplementButtonShow.value = false
+        }
+        
+        inputState.type.value = EventType.ADD
+        // 按钮的状态放在最后，有可能很慢！todo: 不是按钮的状态变化慢，是双击导致的触发慢，这里必须优化！！！
+        buttonsBarState.value = ButtonsBarState.AddOverDisplay
+        cursor.value = CurrentType.ADD
 
+        index++
         val internalEvent2 = InternalEvent(
-            name = "a14f@sgf11zp.com",
-            duration = Duration.ofMinutes(63),
-            label = "核心",
             startTime = LocalDateTime.now(),
+            interval = 3
         )
         events.add(internalEvent2)
     }
 
-    fun onAddOverClick() {
-        ButtonsBarState.AllDisplay
+    fun onAddButtonDoubleClick() {
+        // 下边的逻辑只会在 “新增结束” 下执行（还是添加状态，cursor 不会变化）
+        buttonsBarState.value = ButtonsBarState.AddOverDisplay
 
-        val internalEvent2 = events[1]
-        internalEvent2.endTime = LocalDateTime.now()
+    }
+
+    fun onAddOverClick() {
+        buttonsBarState.value = ButtonsBarState.AllDisplay
+        internalItemState.apply {
+            supplementButtonShow.value = false
+            intervalButtonShow.value = false
+        }
+        cursor.value = CurrentType.MAIN
+
+        events[index] = events[index].copy(
+            endTime = LocalDateTime.now(),
+            duration = Duration.ofMinutes(30)
+        )
     }
 
     fun onInsertClick() {
-        ButtonsBarState.InsertOverDisplay
+        // TODO: 和 Add 公用的状态 
+        inputState.show.value = true
+        internalItemState.apply {
+            intervalButtonShow.value = true
+            supplementButtonShow.value = false
+        }
+        
+        inputState.type.value = EventType.INSERT
+        buttonsBarState.value = ButtonsBarState.InsertOverDisplay
+        cursor.value = CurrentType.INSERT
 
+        index++
         val internalEvent3 = InternalEvent(
-            name = "森森的33.190.80.243",
-            type = EventType.INSERT,
-            duration = Duration.ofMinutes(12),
             startTime = LocalDateTime.now(),
             interval = 77
         )
@@ -90,30 +94,62 @@ class ButtonsViewModel @Inject constructor(
     }
 
     fun onInsertOverClick() {
-        ButtonsBarState.AllDisplay
-
-        val internalEvent3 = events[2]
-        internalEvent3.endTime = LocalDateTime.now()
-    }
-
-    fun onConfirmButtonClick(text: String) {
-        inputState.apply {
-            newName.value = text
-            show.value = false
+        // TODO: 和 Add 共用的状态 
+        buttonsBarState.value = ButtonsBarState.AllDisplay
+        internalItemState.apply {
+            supplementButtonShow.value = false
+            intervalButtonShow.value = false
         }
-        internalItemState.supplementButtonShow.value = true
+        cursor.value = CurrentType.MAIN
 
-        val mainEvent = events[0]
-        val newMainEvent = mainEvent.copy(
-            name = "贵州省毕节市赫章县水塘堡彝族苗族乡",
-            remark = "在,说, 随机一段废话对我的意义x不仅仅是一个重大的",
-            type = EventType.MAIN,
-            label = "当前核心",
+        // TODO: 甚至结束的过程都是一样的？ 
+        events[index] = events[index].copy(
+            endTime = LocalDateTime.now(),
+            duration = Duration.ofMinutes(30)
         )
-        // 替换第一个列表第一个位置的元素
-        events[0] = newMainEvent
-
     }
 
+    fun onStopButtonClick() {
+        buttonsBarState.value = ButtonsBarState.Default
+        internalItemState.supplementButtonShow.value = false
+        cursor.value = null
+
+        // 测试……
+        events[0] = events[0].copy(
+            endTime = LocalDateTime.now()
+        )
+    }
+
+    fun onStopButtonDoubleClick() {
+        // 下边的逻辑只在 cursor.value == CurrentType.MAIN 下进行，为 null 的时候结束图标按钮根本不会显示；
+        // 也就是说下边的逻辑要处理的是当前主题事件的结束以及下一主题事件的开始
+        buttonsBarState.value = ButtonsBarState.AllDisplay
+        cursor.value = CurrentType.MAIN
+    }
+
+    fun undoButtonClick() {
+        TODO("Not yet implemented")
+    }
+
+    
+    fun onConfirmButtonClick(text: String) {
+        val list = text.split("\n")
+        val name = list.first()
+        val remark = if (list.size == 1) null else list.last()
+
+        inputState.show.value = false
+        internalItemState.apply {
+            supplementButtonShow.value = true
+            intervalButtonShow.value = false
+        }
+
+        events[index] = events[index].copy(
+            name = name,
+            remark = remark,
+            type = inputState.type.value,
+            label = "标签",
+        )
+
+    }
 
 }

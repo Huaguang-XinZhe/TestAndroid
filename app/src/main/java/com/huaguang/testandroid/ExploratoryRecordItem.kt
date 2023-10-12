@@ -51,8 +51,11 @@ fun ExploratoryRecordItem(
 
         VerticalLine()
 
-        events.forEach { internalEvent ->
-            InternalEventItem(event = internalEvent)
+        events.forEachIndexed { index, internalEvent ->
+            InternalEventItem(
+                event = internalEvent,
+                isLast = index == events.lastIndex
+            )
         }
 
         TimeLabel(time = events.first().endTime) {
@@ -76,6 +79,7 @@ fun IntervalButtonWithLine(interval: Int) {
 @Composable
 fun InternalEventItem(
     event: InternalEvent, // 伴随每个事件的数据
+    isLast: Boolean,
     viewModel: ButtonsViewModel = viewModel(),
 ) {
     viewModel.internalItemState.apply {
@@ -108,7 +112,7 @@ fun InternalEventItem(
             )
         }
 
-        if (supplementButtonShow.value) {
+        if (isLast && supplementButtonShow.value) {
             SupplementButton()
         }
     }

@@ -1,6 +1,7 @@
 package com.huaguang.testandroid
 
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
@@ -39,7 +40,9 @@ fun RecordPage(
 //        )
     }
 
-    EventInputField()
+    EventInputField(
+        modifier = Modifier.padding(top = 450.dp)
+    )
 }
 
 @Preview(showBackground = true)
