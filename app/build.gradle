@@ -1,6 +1,10 @@
 plugins {
     id 'com.android.application'
     id 'org.jetbrains.kotlin.android'
+
+    // 新增插件
+    id 'kotlin-kapt'
+    id 'com.google.dagger.hilt.android'
 }
 
 android {
@@ -71,5 +75,8 @@ dependencies {
     implementation 'androidx.constraintlayout:constraintlayout-compose:1.0.1'
     // viewModel() 委托所需
     implementation 'androidx.lifecycle:lifecycle-viewmodel-compose:2.6.2'
+    // Hilt 依赖注入框架（模块部分，在应用部分还需要启用插件）
+    implementation 'com.google.dagger:hilt-android:2.46.1'
+    kapt 'com.google.dagger:hilt-compiler:2.46.1'
 
 }

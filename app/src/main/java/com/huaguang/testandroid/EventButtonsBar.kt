@@ -118,11 +118,19 @@ fun StopButton(
     modifier: Modifier = Modifier,
     viewModel: ButtonsViewModel = viewModel()
 ) {
+    val cursor = viewModel.cursor
+
     DoubleClickIconButton(
         iconRes = R.drawable.stop,
         onClick = { viewModel.onStopButtonClick() },
         modifier = modifier
-    ) { viewModel.onStopButtonDoubleClick() }
+    ) {
+        if (cursor.value == CurrentType.ADD || cursor.value == CurrentType.INSERT) {
+            viewModel.onStopButtonClick() // 如果在新增事件和插入事件正在进行时双击结束图标按钮，则执行单击效果
+        } else {
+            viewModel.onStopButtonDoubleClick()
+        }
+    }
 }
 
 /**
@@ -138,8 +146,21 @@ fun AddButton(
 
     DoubleClickButton(
         text = text,
-        onClick = { viewModel.onAddButtonClick(text) },
-    ) { viewModel.onAddButtonDoubleClick() }
+        onClick = {
+            if (text == "新增") {
+                viewModel.onAddClick()
+            } else { // 也只能是 “新增结束” 了
+                viewModel.onAddOverClick()
+            }
+        }
+    ) {
+        if (text == "新增") {
+            viewModel.onAddClick()
+        } else {
+            // TODO: 或许可以改进双击按钮，允许在某些情况下禁止双击，快捷单击，或在某些情况下，双击执行单击效果
+            viewModel.onAddButtonDoubleClick()
+        }
+    }
 
 }
 
@@ -153,7 +174,13 @@ fun InsertButton(
 ) {
     if (text == null) return
 
-    TextButton(onClick = { viewModel.onInsertButtonClick(text) }) {
+    TextButton(onClick = {
+        if (text == "插入") {
+            viewModel.onInsertClick()
+        } else { // 也只能是 ”插入结束“ 了
+            viewModel.onInsertOverClick()
+        }
+    }) {
         Text(text = text)
     }
 }

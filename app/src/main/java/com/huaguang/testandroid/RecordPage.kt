@@ -6,20 +6,25 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
+import androidx.lifecycle.viewmodel.compose.viewModel
 
 @Composable
-fun RecordPage() {
+fun RecordPage(
+    viewModel: ButtonsViewModel = viewModel()
+) {
+    val events = viewModel.events
+
     ConstraintLayout(
         modifier = Modifier.fillMaxSize()
     ) {
         val (itemRef, regulatorRef, buttonsRef) = createRefs()
 
-//        ExploratoryRecordItem(
-//            chainEvent = ,
-//            modifier = Modifier.constrainAs(itemRef) {
-//                top.linkTo(parent.top)
-//            }
-//        )
+        ExploratoryRecordItem(
+            events = events,
+            modifier = Modifier.constrainAs(itemRef) {
+                top.linkTo(parent.top, 15.dp)
+            }
+        )
 
         EventButtonsBar(
             modifier = Modifier.constrainAs(buttonsRef) {
@@ -33,6 +38,8 @@ fun RecordPage() {
 //            }
 //        )
     }
+
+    EventInputField()
 }
 
 @Preview(showBackground = true)

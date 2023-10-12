@@ -26,6 +26,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import java.time.Duration
 import java.time.LocalDateTime
 
@@ -34,6 +35,8 @@ fun ExploratoryRecordItem(
     modifier: Modifier = Modifier,
     events: List<InternalEvent>,
 ) {
+    if (events.isEmpty()) return
+
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = modifier
@@ -69,14 +72,13 @@ fun IntervalButtonWithLine(interval: Int) {
     VerticalLine()
 }
 
-
+// TODO: 这里的状态要引用 ViewModel 的
 @Composable
 fun InternalEventItem(
     event: InternalEvent, // 伴随每个事件的数据
-    state: InternalItemState = InternalItemState.Default, // 伴随每个事件的状态
-    cursor: CurrentType? = null // 不伴随，全局性的状态
+    viewModel: ButtonsViewModel = viewModel(),
 ) {
-    state.apply {
+    viewModel.internalItemState.apply {
         val style = when (event.type) {
             EventType.MAIN -> RecordItemStyle.Main
             EventType.ADD -> RecordItemStyle.Add
@@ -85,11 +87,11 @@ fun InternalEventItem(
         val isMain = event.type == EventType.MAIN
 
         // 依数据而定的显隐逻辑放到具体的组件内部，由状态而定的放在外部
-        if (!isMain && intervalButtonShow) {
+        if (!isMain && intervalButtonShow.value) {
             IntervalButtonWithLine(event.interval)
         }
 
-        if (!isMain && startTimeShow) {
+        if (!isMain && startTimeShow.value) {
             TimeLabelWithLine(
                 time = event.startTime,
             )
@@ -100,16 +102,13 @@ fun InternalEventItem(
             style = style
         )
 
-        if (!isMain && endTimeShow) {
+        if (!isMain && endTimeShow.value) {
             TimeLabelWithLine(
                 time = event.endTime,
             )
         }
 
-        if (supplementButtonShow) {
-            // 对于主事件，如果当前进行的事项不是它的话，那就不要显示补计图标按钮了
-            if (isMain && cursor != CurrentType.MAIN) return
-
+        if (supplementButtonShow.value) {
             SupplementButton()
         }
     }
@@ -160,6 +159,8 @@ fun NameRow(
     event: InternalEvent,
     style: RecordItemStyle
 ) {
+    if (event.name == null) return
+
     style.apply {
         TailHoldRow(
             composables = listOf(
