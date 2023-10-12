@@ -18,9 +18,7 @@ sealed class RecordBlockState(
     val startTimeShow: MutableState<Boolean> = mutableStateOf(false),
     val endTimeShow: MutableState<Boolean> = mutableStateOf(false),
     val supplementButtonShow: MutableState<Boolean> = mutableStateOf(false),
-    val intervalButtonShow: MutableState<Boolean> = mutableStateOf(false),
+    val intervalButtonShow: MutableState<Boolean> = mutableStateOf(true),
 ) {
-    object Default : RecordBlockState(
-
-    )
+    object Default : RecordBlockState()
 }

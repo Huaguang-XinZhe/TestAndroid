@@ -2,7 +2,6 @@ package com.huaguang.testandroid
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -32,45 +31,51 @@ import java.time.LocalDateTime
 
 @Composable
 fun ExploratoryRecordItem(
-    chainEvent: ChainEvent,
     modifier: Modifier = Modifier,
+    events: List<InternalEvent>,
 ) {
-    chainEvent.apply {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = modifier
-                .padding(10.dp)
-                .fillMaxWidth()
-        ) {
-            TimeLabel(
-                time = mainEvent.startTime,
-            ) {  }
-            VerticalLine()
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = modifier
+            .padding(10.dp)
+            .fillMaxWidth()
+    ) {
+        val mainEvent = events.first()
 
-            InternalColumn(event = mainEvent)
+        TimeLabel(
+            time = mainEvent.startTime,
+        ) {  }
 
-            childEvents.forEachIndexed { index, internalEvent ->
-                InternalColumn(event = internalEvent)
+        VerticalLine()
 
-//                IntervalDisplayButton(interval = 23) {
-//
-//                }
-//                VerticalLine()
-            }
+        events.forEach { internalEvent ->
+            InternalEventItem(event = internalEvent)
+        }
 
-            TimeLabel(
-                time = mainEvent.endTime,
-            ) {  }
+        TimeLabel(time = events.first().endTime) {
+            
         }
     }
 }
 
 @Composable
-fun ColumnScope.InternalColumn(
-    event: InternalEvent,
-) {
-    event.apply {
+fun IntervalButtonWithLine(interval: Int) {
+    if (interval < 3) return
 
+    IntervalDisplayButton(interval = interval) {
+
+    }
+
+    VerticalLine()
+}
+
+
+@Composable
+fun InternalEventItem(
+    event: InternalEvent,
+    state: RecordBlockState = RecordBlockState.Default,
+) {
+    state.apply {
         val style = when (event.type) {
             EventType.MAIN -> RecordItemStyle.Main
             EventType.ADD -> RecordItemStyle.Add
@@ -78,19 +83,52 @@ fun ColumnScope.InternalColumn(
         }
         val isMain = event.type == EventType.MAIN
 
-        TimeLabelWithLine(
-            time = startTime,
-            isMain = isMain
+        // 依数据而定的显隐逻辑放到具体的组件内部，由状态而定的放在外部
+        if (!isMain && intervalButtonShow.value) {
+            IntervalButtonWithLine(event.interval)
+        }
+
+        if (!isMain && startTimeShow.value) {
+            TimeLabelWithLine(
+                time = event.startTime,
+            )
+        }
+
+        OutlinedCardItemWithLine(
+            event = event,
+            style = style
         )
 
+        if (!isMain && endTimeShow.value) {
+            TimeLabelWithLine(
+                time = event.endTime,
+            )
+        }
+
+        if (supplementButtonShow.value) {
+            SupplementButton()
+        }
+    }
+}
+
+@Composable
+fun OutlinedCardItemWithLine(
+    event: InternalEvent,
+    style: RecordItemStyle = RecordItemStyle.Main,
+) {
+    event.apply {
         // Card 的内 padding 没有效果，内 padding 也是外 padding
-        OutlinedCard {
+        OutlinedCard(
+            colors = CardDefaults.outlinedCardColors(
+                containerColor = style.backgroundColor
+            )
+        ) {
             val nameBottomPadding = if (remark == null && label == null) 10.dp else 2.dp
             val remarkBottomPadding = if (label == null) 10.dp else 0.dp
 
             NameRow(
                 event = event,
-                style = style, 
+                style = style,
                 modifier = Modifier.padding(10.dp, 10.dp, 10.dp, nameBottomPadding)
             )
 
@@ -104,18 +142,12 @@ fun ColumnScope.InternalColumn(
                 isTag = style.isTag,
                 modifier = Modifier.padding(30.dp, 5.dp, 0.dp, 10.dp),
             ) {
-                // TODO: 标签点击，可能是类属，也可能是 tag 
+                // TODO: 标签点击，可能是类属，也可能是 tag
             }
         }
-
-        VerticalLine()
-
-        TimeLabelWithLine(
-            time = endTime,
-            isMain = isMain
-        )
-
     }
+
+    VerticalLine()
 }
 
 @Composable
@@ -134,7 +166,7 @@ fun NameRow(
                         modifier = Modifier
                             .size(iconSize)
                             .padding(top = iconTopPadding),
-                        tint = MaterialTheme.colorScheme.primary
+                        tint = iconColor
                     )
                 },
                 {
@@ -227,9 +259,7 @@ fun VerticalLine() {
  * 用于补充记录的按钮，可支持点击和长按两种操作
  */
 @Composable
-fun SupplementButton(show: Boolean = true) {
-    if (!show) return
-
+fun SupplementButton() {
     LongPressOutlinedIconButton(
         onClick = {
 
@@ -242,12 +272,9 @@ fun SupplementButton(show: Boolean = true) {
 }
 
 @Composable
-fun ColumnScope.TimeLabelWithLine(
+fun TimeLabelWithLine(
     time: LocalDateTime?,
-    isMain: Boolean = false,
 ) {
-    if (isMain) return
-
     TimeLabel(
         time = time,
         textSize = 12.sp
@@ -268,7 +295,8 @@ fun ExploratoryRecordItemTest() {
         type = EventType.MAIN,
         label = "当前核心",
         startTime = LocalDateTime.now(),
-        endTime = LocalDateTime.now()
+        endTime = LocalDateTime.now(),
+        interval = 12
     )
 
     // TODO: 有没有工具能够根据数据结构自动生成假数据（创建对象的代码）？
@@ -278,7 +306,8 @@ fun ExploratoryRecordItemTest() {
         remark = "河北工商大学",
         label = "探索",
         startTime = LocalDateTime.now(),
-        endTime = LocalDateTime.now()
+        endTime = LocalDateTime.now(),
+        interval = 29
     )
 
     val internalEvent2 = InternalEvent(
@@ -286,7 +315,8 @@ fun ExploratoryRecordItemTest() {
         type = EventType.INSERT,
         duration = Duration.ofMinutes(12),
         startTime = LocalDateTime.now(),
-        endTime = LocalDateTime.now()
+        endTime = LocalDateTime.now(),
+        interval = 77
     )
 
     val internalEvent3 = InternalEvent(
@@ -306,11 +336,8 @@ fun ExploratoryRecordItemTest() {
         endTime = LocalDateTime.now()
     )
 
-    val chainEvent = ChainEvent(
-        mainEvent = internalEvent,
-        childEvents = listOf(internalEvent1, internalEvent2, internalEvent3, internalEvent4),
-    )
+    val events = listOf(internalEvent, internalEvent1, internalEvent2)
 
-    ExploratoryRecordItem(chainEvent = chainEvent)
+    ExploratoryRecordItem(events = events)
 
 }
