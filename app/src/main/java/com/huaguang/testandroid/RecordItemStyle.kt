@@ -26,7 +26,7 @@ sealed class RecordItemStyle(
         iconRes = R.drawable.main,
         isTag = false,
         iconColor = DeepGreen,
-        backgroundColor = Color.Green.copy(alpha = 0.02f)
+        backgroundColor = Color.Green.copy(alpha = 0.03f)
     )
 
     object Add : RecordItemStyle()

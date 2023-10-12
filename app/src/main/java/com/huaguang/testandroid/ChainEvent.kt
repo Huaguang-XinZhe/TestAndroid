@@ -20,9 +20,17 @@ data class InternalEvent(
     val type: EventType = EventType.ADD
 )
 
+// 伴随每个事件的标志
 enum class EventType {
     MAIN,
     ADD,
     INSERT,
 }
 
+// 全局性的标志，依情境而变，不伴随每个事件
+// 如果为 null，代表主题事件已经结束
+enum class CurrentType {
+    MAIN,
+    ADD,
+    INSERT
+}

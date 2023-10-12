@@ -72,8 +72,9 @@ fun IntervalButtonWithLine(interval: Int) {
 
 @Composable
 fun InternalEventItem(
-    event: InternalEvent,
-    state: RecordBlockState = RecordBlockState.Default,
+    event: InternalEvent, // 伴随每个事件的数据
+    state: InternalItemState = InternalItemState.Default, // 伴随每个事件的状态
+    cursor: CurrentType? = null // 不伴随，全局性的状态
 ) {
     state.apply {
         val style = when (event.type) {
@@ -84,11 +85,11 @@ fun InternalEventItem(
         val isMain = event.type == EventType.MAIN
 
         // 依数据而定的显隐逻辑放到具体的组件内部，由状态而定的放在外部
-        if (!isMain && intervalButtonShow.value) {
+        if (!isMain && intervalButtonShow) {
             IntervalButtonWithLine(event.interval)
         }
 
-        if (!isMain && startTimeShow.value) {
+        if (!isMain && startTimeShow) {
             TimeLabelWithLine(
                 time = event.startTime,
             )
@@ -99,13 +100,16 @@ fun InternalEventItem(
             style = style
         )
 
-        if (!isMain && endTimeShow.value) {
+        if (!isMain && endTimeShow) {
             TimeLabelWithLine(
                 time = event.endTime,
             )
         }
 
-        if (supplementButtonShow.value) {
+        if (supplementButtonShow) {
+            // 对于主事件，如果当前进行的事项不是它的话，那就不要显示补计图标按钮了
+            if (isMain && cursor != CurrentType.MAIN) return
+
             SupplementButton()
         }
     }
@@ -296,17 +300,18 @@ fun ExploratoryRecordItemTest() {
         label = "当前核心",
         startTime = LocalDateTime.now(),
         endTime = LocalDateTime.now(),
+        duration = Duration.ofMinutes(30),
         interval = 12
     )
 
     // TODO: 有没有工具能够根据数据结构自动生成假数据（创建对象的代码）？
     val internalEvent1 = InternalEvent(
         name = "敏而好学，不耻下问",
-        duration = Duration.ofMinutes(183),
         remark = "河北工商大学",
         label = "探索",
         startTime = LocalDateTime.now(),
-        endTime = LocalDateTime.now(),
+//        endTime = LocalDateTime.now(),
+//        duration = Duration.ofMinutes(183),
         interval = 29
     )
 
@@ -336,7 +341,7 @@ fun ExploratoryRecordItemTest() {
         endTime = LocalDateTime.now()
     )
 
-    val events = listOf(internalEvent, internalEvent1, internalEvent2)
+    val events = listOf(internalEvent, internalEvent1, )
 
     ExploratoryRecordItem(events = events)
 
