@@ -53,7 +53,7 @@ class ButtonsViewModel @Inject constructor(
         events.add(internalEvent2)
     }
 
-    fun onAddButtonDoubleClick() {
+    fun onAddButtonLongClick() {
         // 下边的逻辑只会在 “新增结束” 下执行（还是添加状态，cursor 不会变化）
         buttonsBarState.value = ButtonsBarState.AddOverDisplay
 
@@ -102,7 +102,7 @@ class ButtonsViewModel @Inject constructor(
         }
         cursor.value = CurrentType.MAIN
 
-        // TODO: 甚至结束的过程都是一样的？ 
+        // TODO: 甚至结束的过程都是一样的？
         events[index] = events[index].copy(
             endTime = LocalDateTime.now(),
             duration = Duration.ofMinutes(30)
@@ -120,7 +120,7 @@ class ButtonsViewModel @Inject constructor(
         )
     }
 
-    fun onStopButtonDoubleClick() {
+    fun onStopButtonLongClick() {
         // 下边的逻辑只在 cursor.value == CurrentType.MAIN 下进行，为 null 的时候结束图标按钮根本不会显示；
         // 也就是说下边的逻辑要处理的是当前主题事件的结束以及下一主题事件的开始
         buttonsBarState.value = ButtonsBarState.AllDisplay

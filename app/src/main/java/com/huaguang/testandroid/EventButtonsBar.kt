@@ -120,15 +120,15 @@ fun StopButton(
 ) {
     val cursor = viewModel.cursor
 
-    DoubleClickIconButton(
+    LongPressIconButton(
         iconRes = R.drawable.stop,
         onClick = { viewModel.onStopButtonClick() },
         modifier = modifier
     ) {
         if (cursor.value == CurrentType.ADD || cursor.value == CurrentType.INSERT) {
-            viewModel.onStopButtonClick() // 如果在新增事件和插入事件正在进行时双击结束图标按钮，则执行单击效果
+            viewModel.onStopButtonClick() // 如果在新增事件和插入事件正在进行时长按结束图标按钮，则执行单击效果
         } else {
-            viewModel.onStopButtonDoubleClick()
+            viewModel.onStopButtonLongClick()
         }
     }
 }
@@ -144,7 +144,7 @@ fun AddButton(
 ) {
     if (text == null) return
 
-    DoubleClickButton(
+    LongPressButton(
         text = text,
         onClick = {
             if (text == "新增") {
@@ -157,8 +157,7 @@ fun AddButton(
         if (text == "新增") {
             viewModel.onAddClick()
         } else {
-            // TODO: 或许可以改进双击按钮，允许在某些情况下禁止双击，快捷单击，或在某些情况下，双击执行单击效果
-            viewModel.onAddButtonDoubleClick()
+            viewModel.onAddButtonLongClick()
         }
     }
 
