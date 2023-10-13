@@ -1,5 +1,7 @@
 package com.huaguang.testandroid
 
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateOf
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -12,8 +14,14 @@ object AppModule {
 
     @Singleton
     @Provides
-    fun provideRecordPageState(): RecordPageState {
-        return RecordPageState()
+    fun provideSharedState(): SharedState {
+        return SharedState()
+    }
+
+    @Singleton
+    @Provides
+    fun provideButtonsBarState(): MutableState<ButtonsBarState> {
+        return mutableStateOf(ButtonsBarState.Default)
     }
 
     @Singleton
@@ -26,6 +34,12 @@ object AppModule {
     @Provides
     fun provideInputState(): InputState {
         return InputState()
+    }
+
+    @Singleton
+    @Provides
+    fun provideTimeCache(): TimeCache {
+        return TimeCache()
     }
 
 }

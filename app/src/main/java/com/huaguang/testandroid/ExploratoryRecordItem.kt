@@ -66,7 +66,7 @@ fun ExploratoryRecordItem(
 
 @Composable
 fun IntervalButtonWithLine(interval: Int) {
-    if (interval < 3) return
+    if (interval < 1) return
 
     IntervalDisplayButton(interval = interval) {
 
@@ -268,13 +268,13 @@ fun VerticalLine() {
  * 用于补充记录的按钮，可支持点击和长按两种操作
  */
 @Composable
-fun SupplementButton() {
+fun SupplementButton(viewModel: ButtonsViewModel = viewModel()) {
     LongPressOutlinedIconButton(
         onClick = {
-
+            viewModel.onSButtonClick()
         },
         onLongClick = {
-
+            viewModel.onSButtonLongClick()
         }
     )
 

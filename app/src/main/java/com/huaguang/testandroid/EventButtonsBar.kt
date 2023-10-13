@@ -25,7 +25,7 @@ fun EventButtonsBar(
     modifier: Modifier = Modifier,
     viewModel: ButtonsViewModel = viewModel(),
 ) {
-    viewModel.pageState.buttonsBarState.value.apply {
+    viewModel.buttonsBarState.value.apply {
         if (!barShow) return
 
         ConstraintLayout( // 使用 Row，在按钮显隐变化时，不太好保证居中的问题
