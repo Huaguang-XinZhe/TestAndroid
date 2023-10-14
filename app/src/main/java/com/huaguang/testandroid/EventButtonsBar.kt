@@ -23,16 +23,14 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 @Composable
 fun EventButtonsBar(
     modifier: Modifier = Modifier,
-    viewModel: ButtonsViewModel = viewModel(),
+    viewModel: RecordPageViewModel = viewModel(),
 ) {
-    viewModel.buttonsBarState.value.apply {
-        if (!barShow) return
+    ConstraintLayout( // 使用 Row，在按钮显隐变化时，不太好保证居中的问题
+        modifier = modifier.fillMaxWidth()
+    ) {
+        val (undoButtonRef, centerButtonsRef, stopButtonRef) = createRefs()
 
-        ConstraintLayout( // 使用 Row，在按钮显隐变化时，不太好保证居中的问题
-            modifier = modifier.fillMaxWidth()
-        ) {
-            val (undoButtonRef, centerButtonsRef, stopButtonRef) = createRefs()
-
+        viewModel.buttonsBarState.value.apply {
             UndoButton(
                 modifier = Modifier.constrainAs(undoButtonRef) {
                     start.linkTo(parent.start, 16.dp)
@@ -79,10 +77,11 @@ fun EventButtonsBar(
 
         }
     }
+
 }
 
 @Composable
-fun MainStartButton(viewModel: ButtonsViewModel = viewModel()) {
+fun MainStartButton(viewModel: RecordPageViewModel = viewModel()) {
     Button(
         onClick = { viewModel.onMainStartClick() },
     ) {
@@ -96,7 +95,7 @@ fun MainStartButton(viewModel: ButtonsViewModel = viewModel()) {
 @Composable
 fun UndoButton(
     modifier: Modifier = Modifier,
-    viewModel: ButtonsViewModel = viewModel()
+    viewModel: RecordPageViewModel = viewModel()
 ) {
     IconButton(
         onClick = { viewModel.undoButtonClick() },
@@ -116,7 +115,7 @@ fun UndoButton(
 @Composable
 fun StopButton(
     modifier: Modifier = Modifier,
-    viewModel: ButtonsViewModel = viewModel()
+    viewModel: RecordPageViewModel = viewModel()
 ) {
     val cursor = viewModel.cursor
 
@@ -140,7 +139,7 @@ fun StopButton(
 @Composable
 fun AddButton(
     text: String?,
-    viewModel: ButtonsViewModel = viewModel()
+    viewModel: RecordPageViewModel = viewModel()
 ) {
     if (text == null) return
 
@@ -169,7 +168,7 @@ fun AddButton(
 @Composable
 fun InsertButton(
     text: String?,
-    viewModel: ButtonsViewModel = viewModel()
+    viewModel: RecordPageViewModel = viewModel()
 ) {
     if (text == null) return
 

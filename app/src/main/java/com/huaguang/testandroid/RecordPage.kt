@@ -11,7 +11,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 
 @Composable
 fun RecordPage(
-    viewModel: ButtonsViewModel = viewModel()
+    viewModel: RecordPageViewModel = viewModel()
 ) {
     val events = viewModel.events
 
@@ -20,24 +20,38 @@ fun RecordPage(
     ) {
         val (itemRef, regulatorRef, buttonsRef) = createRefs()
 
-        ExploratoryRecordItem(
-            events = events,
-            modifier = Modifier.constrainAs(itemRef) {
-                top.linkTo(parent.top, 15.dp)
+        viewModel.pageState.apply {
+            if (recordMode.value) {
+                ExploratoryRecordBlock(
+                    events = events,
+                    modifier = Modifier.constrainAs(itemRef) {
+                        top.linkTo(parent.top, 15.dp)
+                    }
+                )
+            } else {
+                // TODO: 展示块
             }
-        )
 
-        EventButtonsBar(
-            modifier = Modifier.constrainAs(buttonsRef) {
-                bottom.linkTo(parent.bottom, 15.dp)
+            if (buttonsBarShow.value) {
+                EventButtonsBar(
+                    modifier = Modifier.constrainAs(buttonsRef) {
+                        bottom.linkTo(parent.bottom, 15.dp)
+                    }
+                )
             }
-        )
 
-//        TimeRegulatorBar(
-//            modifier = Modifier.constrainAs(regulatorRef) {
-//                bottom.linkTo(buttonsRef.top, 5.dp)
-//            }
-//        )
+            if (regulatorBarShow.value) {
+                TimeRegulatorBar(
+                    modifier = Modifier.constrainAs(regulatorRef) {
+                        if (buttonsBarShow.value) {
+                            bottom.linkTo(buttonsRef.top, 5.dp)
+                        } else {
+                            bottom.linkTo(parent.bottom, 15.dp)
+                        }
+                    }
+                )
+            }
+        }
     }
 
     EventInputField(

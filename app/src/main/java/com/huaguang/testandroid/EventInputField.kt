@@ -24,7 +24,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 @Composable
 fun EventInputField(
     modifier: Modifier = Modifier,
-    viewModel: ButtonsViewModel = viewModel(),
+    viewModel: RecordPageViewModel = viewModel(),
 ) {
     if (!viewModel.inputState.show.value) return // 为 false 不显示
 

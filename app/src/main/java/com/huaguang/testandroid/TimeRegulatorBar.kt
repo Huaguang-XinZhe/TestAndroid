@@ -17,10 +17,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 
 @Composable
 fun TimeRegulatorBar(
     modifier: Modifier = Modifier,
+    viewModel: RecordPageViewModel = viewModel()
 ) {
     Row(
         modifier = modifier.fillMaxWidth(),
@@ -31,12 +33,14 @@ fun TimeRegulatorBar(
 
         TimeAdjustIconButton(-1, R.drawable.minus)
 
-        IconButton(onClick = { /*TODO*/ }) {
+        IconButton(onClick = { viewModel.onHideButtonClick() }) {
             Icon(
                 painter = painterResource(id = R.drawable.arrow_down),
                 contentDescription = null,
                 tint = Color.DarkGray.copy(alpha = 0.6f),
-                modifier = Modifier.size(36.dp).padding(top = 12.dp)
+                modifier = Modifier
+                    .size(36.dp)
+                    .padding(top = 12.dp)
             )
         }
 

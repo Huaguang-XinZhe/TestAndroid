@@ -6,7 +6,7 @@ import androidx.compose.runtime.mutableStateOf
 // TODO: 这里可能要重构
 data class RecordPageState(
     val regulatorBarShow: MutableState<Boolean> = mutableStateOf(false),
-    val recordBlockShow: MutableState<Boolean> = mutableStateOf(true),
+    val recordMode: MutableState<Boolean> = mutableStateOf(true),
+    val buttonsBarShow: MutableState<Boolean> = mutableStateOf(true),
     val currentType: MutableState<CurrentType?> = mutableStateOf(null),
-    val buttonsBarState: MutableState<ButtonsBarState> = mutableStateOf(ButtonsBarState.Default),
 )

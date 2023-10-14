@@ -14,8 +14,8 @@ object AppModule {
 
     @Singleton
     @Provides
-    fun provideSharedState(): SharedState {
-        return SharedState()
+    fun providePageState(): RecordPageState {
+        return RecordPageState()
     }
 
     @Singleton
@@ -26,8 +26,8 @@ object AppModule {
 
     @Singleton
     @Provides
-    fun provideInternalItemState(): InternalItemState {
-        return InternalItemState()
+    fun provideInternalItemState(): RecordBlockState {
+        return RecordBlockState()
     }
 
     @Singleton

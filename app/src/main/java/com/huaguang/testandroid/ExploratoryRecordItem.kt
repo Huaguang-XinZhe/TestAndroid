@@ -16,6 +16,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -24,6 +25,7 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -31,9 +33,10 @@ import java.time.Duration
 import java.time.LocalDateTime
 
 @Composable
-fun ExploratoryRecordItem(
+fun ExploratoryRecordBlock(
     modifier: Modifier = Modifier,
     events: List<InternalEvent>,
+    viewModel: RecordPageViewModel = viewModel()
 ) {
     if (events.isEmpty()) return
 
@@ -45,11 +48,11 @@ fun ExploratoryRecordItem(
     ) {
         val mainEvent = events.first()
 
-        TimeLabel(
+        TimeLabelWithLine(
             time = mainEvent.startTime,
-        ) {  }
-
-        VerticalLine()
+            textSize = 16.sp,
+            selectedState = viewModel.recordBlockState.mainStartLabelSelected
+        )
 
         events.forEachIndexed { index, internalEvent ->
             InternalEventItem(
@@ -58,11 +61,15 @@ fun ExploratoryRecordItem(
             )
         }
 
-        TimeLabel(time = events.first().endTime) {
-            
-        }
+        TimeLabelWithLine(
+            time = events.first().endTime,
+            textSize = 16.sp,
+            withLine = false,
+            selectedState = viewModel.recordBlockState.mainEndLabelSelected
+        )
     }
 }
+
 
 @Composable
 fun IntervalButtonWithLine(interval: Int) {
@@ -80,22 +87,22 @@ fun IntervalButtonWithLine(interval: Int) {
 fun InternalEventItem(
     event: InternalEvent, // 伴随每个事件的数据
     isLast: Boolean,
-    viewModel: ButtonsViewModel = viewModel(),
+    viewModel: RecordPageViewModel = viewModel(),
 ) {
-    viewModel.internalItemState.apply {
+    viewModel.recordBlockState.apply {
         val style = when (event.type) {
             EventType.MAIN -> RecordItemStyle.Main
             EventType.ADD -> RecordItemStyle.Add
             EventType.INSERT -> RecordItemStyle.Insert
         }
-        val isMain = event.type == EventType.MAIN
+        val isSubLatest = event.type != EventType.MAIN && isLast // 当前事项是最新项，但非主题事件
 
         // 依数据而定的显隐逻辑放到具体的组件内部，由状态而定的放在外部
-        if (!isMain && intervalButtonShow.value) {
+        if (isSubLatest && intervalButtonShow.value) {
             IntervalButtonWithLine(event.interval)
         }
 
-        if (!isMain && startTimeShow.value) {
+        if (isSubLatest && startTimeShow.value) {
             TimeLabelWithLine(
                 time = event.startTime,
             )
@@ -106,13 +113,13 @@ fun InternalEventItem(
             style = style
         )
 
-        if (!isMain && endTimeShow.value) {
+        if (isSubLatest && endTimeShow.value) {
             TimeLabelWithLine(
                 time = event.endTime,
             )
         }
 
-        if (isLast && supplementButtonShow.value) {
+        if (isLast && supplementButtonShow.value && !endTimeShow.value) {
             SupplementButton()
         }
     }
@@ -152,9 +159,15 @@ fun OutlinedCardItemWithLine(
                 // TODO: 标签点击，可能是类属，也可能是 tag
             }
         }
+
+        if (name == null || (type != EventType.MAIN && endTime == null)) return
+
+        VerticalLine()
     }
 
-    VerticalLine()
+
+
+
 }
 
 @Composable
@@ -268,7 +281,7 @@ fun VerticalLine() {
  * 用于补充记录的按钮，可支持点击和长按两种操作
  */
 @Composable
-fun SupplementButton(viewModel: ButtonsViewModel = viewModel()) {
+fun SupplementButton(viewModel: RecordPageViewModel = viewModel()) {
     LongPressOutlinedIconButton(
         onClick = {
             viewModel.onSButtonClick()
@@ -283,15 +296,23 @@ fun SupplementButton(viewModel: ButtonsViewModel = viewModel()) {
 @Composable
 fun TimeLabelWithLine(
     time: LocalDateTime?,
+    textSize: TextUnit = 12.sp,
+    withLine: Boolean = true,
+    viewModel: RecordPageViewModel = viewModel(),
+    // 在函数的参数中，下一个参数（指定默认值时）可以使用上一参数的值
+    selectedState: MutableState<Boolean> = viewModel.recordBlockState.subTimeLabelSelected
 ) {
     TimeLabel(
         time = time,
-        textSize = 12.sp
+        textSize = textSize,
+        selectedState = selectedState,
     ) {
-        // TODO:
+        viewModel.onTimeLabelClick()
     }
 
-    VerticalLine()
+    if (withLine) {
+        VerticalLine()
+    }
 }
 
 @Preview(showBackground = true)
@@ -348,6 +369,6 @@ fun ExploratoryRecordItemTest() {
 
     val events = listOf(internalEvent, internalEvent1, )
 
-    ExploratoryRecordItem(events = events)
+    ExploratoryRecordBlock(events = events)
 
 }

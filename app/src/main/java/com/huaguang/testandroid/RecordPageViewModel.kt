@@ -10,17 +10,16 @@ import java.time.temporal.ChronoUnit
 import javax.inject.Inject
 
 @HiltViewModel
-class ButtonsViewModel @Inject constructor(
+class RecordPageViewModel @Inject constructor(
     val buttonsBarState: MutableState<ButtonsBarState>,
-    val internalItemState: InternalItemState,
+    val recordBlockState: RecordBlockState,
     val inputState: InputState,
     private val timeCache: TimeCache,
-    sharedState: SharedState,
+    val pageState: RecordPageState,
 ) : ViewModel() {
-    val cursor = sharedState.currentType
+    val cursor = pageState.currentType
 
     val events = mutableStateListOf<InternalEvent>()
-    private var index = 0
 
     fun onMainStartClick() {
         inputState.show.value = true
@@ -46,14 +45,7 @@ class ButtonsViewModel @Inject constructor(
     }
 
     fun onAddOverClick() {
-        buttonsBarState.value = ButtonsBarState.AllDisplay
-        internalItemState.apply {
-            supplementButtonShow.value = false
-            intervalButtonShow.value = false
-        }
-        cursor.value = CurrentType.MAIN
-
-        stopCurrentEvent()
+        onMiddleButtonOverClick()
     }
 
     fun onInsertClick(startTime: LocalDateTime = LocalDateTime.now()) {
@@ -61,20 +53,17 @@ class ButtonsViewModel @Inject constructor(
     }
 
     fun onInsertOverClick() {
-        // TODO: 和 Add 共用的状态 
-        buttonsBarState.value = ButtonsBarState.AllDisplay
-        internalItemState.apply {
-            supplementButtonShow.value = false
-            intervalButtonShow.value = false
-        }
-        cursor.value = CurrentType.MAIN
-
-        stopCurrentEvent()
+        onMiddleButtonOverClick()
     }
+
 
     fun onStopButtonClick() {
         buttonsBarState.value = ButtonsBarState.Default
-        internalItemState.supplementButtonShow.value = false
+        recordBlockState.apply {
+            supplementButtonShow.value = false
+            mainEndLabelSelected.value = true
+        }
+        updatePageState()
 
         if (cursor.value != CurrentType.MAIN) {
             stopCurrentEvent()
@@ -96,10 +85,17 @@ class ButtonsViewModel @Inject constructor(
     
     fun onConfirmButtonClick(text: String) {
         inputState.show.value = false
-        internalItemState.apply {
-            supplementButtonShow.value = true
-            intervalButtonShow.value = false
+        recordBlockState.apply {
+            if (timeCache.index == 0) { // 主题事件下
+                supplementButtonShow.value = true // 只有主题事件在确认点击后才显示补计按钮
+                mainStartLabelSelected.value = true
+            } else {
+                intervalButtonShow.value = false
+                startTimeShow.value = true
+                subTimeLabelSelected.value = true
+            }
         }
+        updatePageState()
 
         updateName(text)
     }
@@ -123,27 +119,28 @@ class ButtonsViewModel @Inject constructor(
         startTime: LocalDateTime = LocalDateTime.now(),
         type: EventType = EventType.MAIN,
     ) {
-        val now = LocalDateTime.now()
         val internalEvent = InternalEvent(
             startTime = startTime,
-            interval = ChronoUnit.MINUTES.between(lastTime, now).toInt(),
+            interval = ChronoUnit.MINUTES.between(lastTime, startTime).toInt() + 10,
             type = type,
         )
+        val now = LocalDateTime.now()
 
         if (type == EventType.MAIN) {
             timeCache.mainStart = now
         } else {
             timeCache.currentStart = now
         }
+
         events.add(internalEvent)
     }
 
     private fun stopCurrentEvent() {
         val now = LocalDateTime.now()
         timeCache.currentEnd = now
-        events[index] = events[index].copy(
+        events[timeCache.index] = events[timeCache.index].copy(
             endTime = now,
-            duration = Duration.between(events[index].startTime, now)
+            duration = Duration.between(events[timeCache.index].startTime, now)
         )
     }
 
@@ -151,7 +148,8 @@ class ButtonsViewModel @Inject constructor(
         val now = LocalDateTime.now()
         timeCache.mainEnd = now
         events[0] = events[0].copy(
-            endTime = now
+            endTime = now,
+            duration = Duration.between(timeCache.mainStart, now)
         )
     }
 
@@ -160,7 +158,7 @@ class ButtonsViewModel @Inject constructor(
         val name = list.first()
         val remark = if (list.size == 1) null else list.last()
 
-        events[index] = events[index].copy(
+        events[timeCache.index] = events[timeCache.index].copy(
             name = name,
             remark = remark,
             label = "标签", // TODO: 根据名称去判断
@@ -169,7 +167,7 @@ class ButtonsViewModel @Inject constructor(
 
     private fun onMiddleButtonClick(type: EventType, startTime: LocalDateTime) {
         inputState.show.value = true
-        internalItemState.apply {
+        recordBlockState.apply {
             intervalButtonShow.value = true
             supplementButtonShow.value = false
         }
@@ -182,7 +180,7 @@ class ButtonsViewModel @Inject constructor(
             cursor.value = CurrentType.INSERT
         }
 
-        val lastTime = if (index == 0) {
+        val lastTime = if (timeCache.index == 0) {
             timeCache.mainStart!! // 能点击新增，主题时间的开始时间一定不为 null
         } else {
             // 这里的 currentEnd 其实是上一事件的结束时间，因为在创建新时间的时候没有把它更新为 null
@@ -193,11 +191,25 @@ class ButtonsViewModel @Inject constructor(
             type = type,
             startTime = startTime
         )
-        index++
+        timeCache.index++
+    }
+
+    private fun onMiddleButtonOverClick() {
+        buttonsBarState.value = ButtonsBarState.AllDisplay
+        recordBlockState.apply {
+            supplementButtonShow.value = true
+            intervalButtonShow.value = false
+            endTimeShow.value = true
+            subTimeLabelSelected.value = true
+        }
+        cursor.value = CurrentType.MAIN
+        updatePageState()
+
+        stopCurrentEvent()
     }
 
     private fun supplement(isAdd: Boolean = true) {
-        val adjustedStartTime = if (index == 0) {
+        val adjustedStartTime = if (timeCache.index == 0) {
             timeCache.mainStart!!.plusMinutes(1)
         } else {
             // 这个 currentEnd 在当前事项还没有结束的时候就是上一个事件的结束时间
@@ -208,6 +220,34 @@ class ButtonsViewModel @Inject constructor(
             onAddClick(adjustedStartTime)
         } else { // 也只能是插入了
             onInsertClick(adjustedStartTime)
+        }
+    }
+
+    fun onHideButtonClick() {
+        pageState.apply {
+            regulatorBarShow.value = false
+            buttonsBarShow.value = true
+        }
+        recordBlockState.apply {
+            startTimeShow.value = false
+            endTimeShow.value = false
+            subTimeLabelSelected.value = false
+            mainStartLabelSelected.value = false
+            mainEndLabelSelected.value = false
+        }
+    }
+
+    fun onTimeLabelClick() {
+        updatePageState()
+    }
+
+    /**
+     * 只要时间标签一选中，就响应（弹出时间调节器，隐藏按钮行）
+     */
+    private fun updatePageState() {
+        pageState.apply {
+            buttonsBarShow.value = false
+            regulatorBarShow.value = true
         }
     }
 
