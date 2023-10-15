@@ -1,4 +1,4 @@
-package com.huaguang.testandroid
+package com.huaguang.testandroid.buttons_bar
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
@@ -19,6 +19,11 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.huaguang.testandroid.R
+import com.huaguang.testandroid.RecordPageViewModel
+import com.huaguang.testandroid.record_block.CurrentType
+import com.huaguang.testandroid.widget.LongPressButton
+import com.huaguang.testandroid.widget.LongPressIconButton
 
 @Composable
 fun EventButtonsBar(

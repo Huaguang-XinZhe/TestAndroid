@@ -1,4 +1,4 @@
-package com.huaguang.testandroid
+package com.huaguang.testandroid.input_field
 
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf

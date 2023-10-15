@@ -1,4 +1,4 @@
-package com.huaguang.testandroid
+package com.huaguang.testandroid.record_block
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -19,6 +19,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.huaguang.testandroid.format
 import java.time.LocalDateTime
 
 @Composable
@@ -27,7 +28,6 @@ fun TimeLabel(
     time: LocalDateTime?,
     selectedState: MutableState<Boolean>,
     textSize: TextUnit = 16.sp,
-    onClick: () -> Unit,
 ) {
     if (time == null) return
 
@@ -45,10 +45,7 @@ fun TimeLabel(
                 interactionSource = interactionSource,
                 indication = rememberRipple(bounded = true), // 必须设为 true，为 false 的话水波纹的最大范围是一个以组件宽度为直径的圆形
                 onClick = {
-                    if (!selectedState.value) { // 没选中的话，点击才有效
-                        selectedState.value = true
-                        onClick()
-                    }
+                    selectedState.value = true
                 }
             )
             .border(0.6.dp, borderColor, shape = shape)

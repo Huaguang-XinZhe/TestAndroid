@@ -1,4 +1,4 @@
-package com.huaguang.testandroid
+package com.huaguang.testandroid.record_block
 
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
@@ -13,7 +13,6 @@ data class RecordBlockState(
     val intervalButtonShow: MutableState<Boolean> = mutableStateOf(false),
     val startTimeShow: MutableState<Boolean> = mutableStateOf(false),
     val endTimeShow: MutableState<Boolean> = mutableStateOf(false),
-    val subTimeLabelSelected: MutableState<Boolean> = mutableStateOf(true),
+    val timeLabelSelected: MutableState<Boolean> = mutableStateOf(false), // 必须为 false，否则一开始就是调节模式
     val mainStartLabelSelected: MutableState<Boolean> = mutableStateOf(false),
-    val mainEndLabelSelected: MutableState<Boolean> = mutableStateOf(false),
 )

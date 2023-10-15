@@ -51,15 +51,23 @@ fun TimeRegulatorBar(
 }
 
 @Composable
-fun TimeAdjustButton(value: Long, label: String) {
-    TextButton(onClick = {  }) {
+fun TimeAdjustButton(
+    value: Long,
+    label: String,
+    viewModel: RecordPageViewModel = viewModel()
+) {
+    TextButton(onClick = { viewModel.onAdjustButtonClick(value) }) {
         Text(label)
     }
 }
 
 @Composable
-fun TimeAdjustIconButton(value: Long, iconRes: Int) {
-    IconButton(onClick = {  }) {
+fun TimeAdjustIconButton(
+    value: Long,
+    iconRes: Int,
+    viewModel: RecordPageViewModel = viewModel()
+) {
+    IconButton(onClick = { viewModel.onAdjustButtonClick(value) }) {
         Icon(
             painter = painterResource(id = iconRes),
             contentDescription = null,

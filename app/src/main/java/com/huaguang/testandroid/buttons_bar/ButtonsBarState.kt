@@ -1,4 +1,4 @@
-package com.huaguang.testandroid
+package com.huaguang.testandroid.buttons_bar
 
 sealed class ButtonsBarState(
     val mainStartButtonShow: Boolean = true,

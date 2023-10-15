@@ -1,4 +1,4 @@
-package com.huaguang.testandroid
+package com.huaguang.testandroid.record_block
 
 /**
  * 这 toggleItem 从展示模式切换至记录模式时，事项的呈现状态（模式）

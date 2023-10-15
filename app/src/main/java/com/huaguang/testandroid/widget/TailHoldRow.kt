@@ -1,4 +1,4 @@
-package com.huaguang.testandroid
+package com.huaguang.testandroid.widget
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxWidth

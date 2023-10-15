@@ -3,7 +3,18 @@ package com.huaguang.testandroid
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateListOf
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.huaguang.testandroid.buttons_bar.ButtonsBarState
+import com.huaguang.testandroid.input_field.InputState
+import com.huaguang.testandroid.record_block.CurrentType
+import com.huaguang.testandroid.record_block.EventType
+import com.huaguang.testandroid.record_block.InternalEvent
+import com.huaguang.testandroid.record_block.RecordBlockState
+import com.huaguang.testandroid.record_block.TimeCache
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import java.time.Duration
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
@@ -16,10 +27,11 @@ class RecordPageViewModel @Inject constructor(
     val inputState: InputState,
     private val timeCache: TimeCache,
     val pageState: RecordPageState,
+    private val sharedState: SharedState,
 ) : ViewModel() {
     val cursor = pageState.currentType
-
     val events = mutableStateListOf<InternalEvent>()
+    private var job: Job? = null
 
     fun onMainStartClick() {
         inputState.show.value = true
@@ -61,9 +73,9 @@ class RecordPageViewModel @Inject constructor(
         buttonsBarState.value = ButtonsBarState.Default
         recordBlockState.apply {
             supplementButtonShow.value = false
-            mainEndLabelSelected.value = true
+            timeLabelSelected.value = true
         }
-        updatePageState()
+        setJob()
 
         if (cursor.value != CurrentType.MAIN) {
             stopCurrentEvent()
@@ -92,10 +104,10 @@ class RecordPageViewModel @Inject constructor(
             } else {
                 intervalButtonShow.value = false
                 startTimeShow.value = true
-                subTimeLabelSelected.value = true
+                timeLabelSelected.value = true
             }
+            setJob()
         }
-        updatePageState()
 
         updateName(text)
     }
@@ -200,10 +212,10 @@ class RecordPageViewModel @Inject constructor(
             supplementButtonShow.value = true
             intervalButtonShow.value = false
             endTimeShow.value = true
-            subTimeLabelSelected.value = true
+            timeLabelSelected.value = true
         }
+        setJob()
         cursor.value = CurrentType.MAIN
-        updatePageState()
 
         stopCurrentEvent()
     }
@@ -224,31 +236,30 @@ class RecordPageViewModel @Inject constructor(
     }
 
     fun onHideButtonClick() {
-        pageState.apply {
-            regulatorBarShow.value = false
-            buttonsBarShow.value = true
-        }
         recordBlockState.apply {
             startTimeShow.value = false
             endTimeShow.value = false
-            subTimeLabelSelected.value = false
+            timeLabelSelected.value = false
             mainStartLabelSelected.value = false
-            mainEndLabelSelected.value = false
         }
     }
 
-    fun onTimeLabelClick() {
-        updatePageState()
-    }
+    fun onAdjustButtonClick(value: Long) {
+        job?.cancel()
+        setJob {
+            // TODO: 更新数据
 
-    /**
-     * 只要时间标签一选中，就响应（弹出时间调节器，隐藏按钮行）
-     */
-    private fun updatePageState() {
-        pageState.apply {
-            buttonsBarShow.value = false
-            regulatorBarShow.value = true
+            sharedState.toastMessage.value = "时间调整成功"
         }
     }
+
+    private fun setJob(action: (() -> Unit)? = null) {
+        job = viewModelScope.launch {
+            delay(1500) // 延迟一秒
+            action?.invoke()
+            onHideButtonClick()
+        }
+    }
+
 
 }

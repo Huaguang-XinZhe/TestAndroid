@@ -1,4 +1,4 @@
-package com.huaguang.testandroid
+package com.huaguang.testandroid.record_block
 
 import androidx.annotation.DrawableRes
 import androidx.compose.ui.graphics.Color
@@ -6,6 +6,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.huaguang.testandroid.R
 import com.huaguang.testandroid.ui.theme.DeepGreen
 import com.huaguang.testandroid.ui.theme.Primary
 import com.huaguang.testandroid.ui.theme.PurpleWhite

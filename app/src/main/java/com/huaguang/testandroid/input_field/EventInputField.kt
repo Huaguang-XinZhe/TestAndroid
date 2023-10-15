@@ -1,4 +1,4 @@
-package com.huaguang.testandroid
+package com.huaguang.testandroid.input_field
 
 import androidx.compose.foundation.layout.Row
 import androidx.compose.material3.Button
@@ -19,6 +19,7 @@ import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.huaguang.testandroid.RecordPageViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

@@ -1,4 +1,4 @@
-package com.huaguang.testandroid
+package com.huaguang.testandroid.record_block
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
@@ -29,6 +29,12 @@ import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.huaguang.testandroid.RecordPageViewModel
+import com.huaguang.testandroid.format
+import com.huaguang.testandroid.widget.Label
+import com.huaguang.testandroid.widget.LabelType
+import com.huaguang.testandroid.widget.LongPressOutlinedIconButton
+import com.huaguang.testandroid.widget.TailHoldRow
 import java.time.Duration
 import java.time.LocalDateTime
 
@@ -65,7 +71,6 @@ fun ExploratoryRecordBlock(
             time = events.first().endTime,
             textSize = 16.sp,
             withLine = false,
-            selectedState = viewModel.recordBlockState.mainEndLabelSelected
         )
     }
 }
@@ -300,15 +305,13 @@ fun TimeLabelWithLine(
     withLine: Boolean = true,
     viewModel: RecordPageViewModel = viewModel(),
     // 在函数的参数中，下一个参数（指定默认值时）可以使用上一参数的值
-    selectedState: MutableState<Boolean> = viewModel.recordBlockState.subTimeLabelSelected
+    selectedState: MutableState<Boolean> = viewModel.recordBlockState.timeLabelSelected
 ) {
     TimeLabel(
         time = time,
         textSize = textSize,
         selectedState = selectedState,
-    ) {
-        viewModel.onTimeLabelClick()
-    }
+    )
 
     if (withLine) {
         VerticalLine()

@@ -1,4 +1,4 @@
-package com.huaguang.testandroid
+package com.huaguang.testandroid.record_block
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -27,6 +27,7 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.huaguang.testandroid.R
 
 @Composable
 fun IntervalDisplayButton(
