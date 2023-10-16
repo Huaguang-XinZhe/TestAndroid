@@ -11,31 +11,40 @@ import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.huaguang.testandroid.RecordPageViewModel
+import com.huaguang.testandroid.TimeState
 import com.huaguang.testandroid.format
 import java.time.LocalDateTime
 
 @Composable
 fun TimeLabel(
     modifier: Modifier = Modifier,
-    time: LocalDateTime?,
-    selectedState: MutableState<Boolean>,
-    textSize: TextUnit = 16.sp,
+    timeState: TimeState,
+    textSize: TextUnit,
+    viewModel: RecordPageViewModel = viewModel()
 ) {
-    if (time == null) return
+    val dynamicTime = viewModel.recordBlockState.dynamicTime.value
+    if (timeState.initialTime == null || dynamicTime == null) return
 
     val interactionSource = remember { MutableInteractionSource() }
     val shape = RoundedCornerShape(4.dp)
-    val borderColor = if (selectedState.value) {
-        MaterialTheme.colorScheme.primary
-    } else Color.LightGray
+    val borderColor: Color
+    val timeDisplay: LocalDateTime
+
+    if (timeState.selected.value) {
+        borderColor = MaterialTheme.colorScheme.primary
+        timeDisplay = dynamicTime // 会变化的时间
+    } else {
+        borderColor = Color.LightGray
+        timeDisplay = timeState.initialTime!! // 来自数据库
+    }
 
     Box(
         modifier = modifier
@@ -45,7 +54,7 @@ fun TimeLabel(
                 interactionSource = interactionSource,
                 indication = rememberRipple(bounded = true), // 必须设为 true，为 false 的话水波纹的最大范围是一个以组件宽度为直径的圆形
                 onClick = {
-                    selectedState.value = true
+                    timeState.selected.value = true
                 }
             )
             .border(0.6.dp, borderColor, shape = shape)
@@ -53,7 +62,7 @@ fun TimeLabel(
             .padding(horizontal = 3.dp)
     ) {
         Text(
-            text = time.format(),
+            text = timeDisplay.format(),
             color = borderColor,
             fontSize = textSize
         )

@@ -10,6 +10,7 @@ import java.time.LocalDateTime
 //)
 
 data class InternalEvent(
+    val id: Long = 0,
     val startTime: LocalDateTime,
     val name: String? = null,
     var endTime: LocalDateTime? = null,

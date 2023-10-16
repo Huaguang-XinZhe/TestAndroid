@@ -2,6 +2,7 @@ package com.huaguang.testandroid.record_block
 
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
+import java.time.LocalDateTime
 
 
 /**
@@ -11,6 +12,7 @@ import androidx.compose.runtime.mutableStateOf
 data class RecordBlockState(
     val supplementButtonShow: MutableState<Boolean> = mutableStateOf(false),
     val intervalButtonShow: MutableState<Boolean> = mutableStateOf(false),
+    val dynamicTime: MutableState<LocalDateTime?> = mutableStateOf(null),
     val startTimeShow: MutableState<Boolean> = mutableStateOf(false),
     val endTimeShow: MutableState<Boolean> = mutableStateOf(false),
     val timeLabelSelected: MutableState<Boolean> = mutableStateOf(false), // 必须为 false，否则一开始就是调节模式

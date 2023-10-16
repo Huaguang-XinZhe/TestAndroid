@@ -16,7 +16,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -30,6 +29,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.huaguang.testandroid.RecordPageViewModel
+import com.huaguang.testandroid.TimeState
 import com.huaguang.testandroid.format
 import com.huaguang.testandroid.widget.Label
 import com.huaguang.testandroid.widget.LabelType
@@ -41,8 +41,7 @@ import java.time.LocalDateTime
 @Composable
 fun ExploratoryRecordBlock(
     modifier: Modifier = Modifier,
-    events: List<InternalEvent>,
-    viewModel: RecordPageViewModel = viewModel()
+    events: List<InternalEvent>
 ) {
     if (events.isEmpty()) return
 
@@ -55,22 +54,20 @@ fun ExploratoryRecordBlock(
         val mainEvent = events.first()
 
         TimeLabelWithLine(
-            time = mainEvent.startTime,
-            textSize = 16.sp,
-            selectedState = viewModel.recordBlockState.mainStartLabelSelected
+            event = mainEvent,
+            textSize = 16.sp
         )
 
         events.forEachIndexed { index, internalEvent ->
             InternalEventItem(
                 event = internalEvent,
-                isLast = index == events.lastIndex
             )
         }
 
         TimeLabelWithLine(
-            time = events.first().endTime,
-            textSize = 16.sp,
-            withLine = false,
+            event = events.first(),
+            isStart = false,
+            textSize = 16.sp
         )
     }
 }
@@ -87,47 +84,49 @@ fun IntervalButtonWithLine(interval: Int) {
     VerticalLine()
 }
 
-// TODO: 这里的状态要引用 ViewModel 的
 @Composable
 fun InternalEventItem(
     event: InternalEvent, // 伴随每个事件的数据
-    isLast: Boolean,
-    viewModel: RecordPageViewModel = viewModel(),
 ) {
-    viewModel.recordBlockState.apply {
-        val style = when (event.type) {
-            EventType.MAIN -> RecordItemStyle.Main
-            EventType.ADD -> RecordItemStyle.Add
-            EventType.INSERT -> RecordItemStyle.Insert
-        }
-        val isSubLatest = event.type != EventType.MAIN && isLast // 当前事项是最新项，但非主题事件
-
-        // 依数据而定的显隐逻辑放到具体的组件内部，由状态而定的放在外部
-        if (isSubLatest && intervalButtonShow.value) {
-            IntervalButtonWithLine(event.interval)
-        }
-
-        if (isSubLatest && startTimeShow.value) {
-            TimeLabelWithLine(
-                time = event.startTime,
-            )
-        }
-
-        OutlinedCardItemWithLine(
-            event = event,
-            style = style
-        )
-
-        if (isSubLatest && endTimeShow.value) {
-            TimeLabelWithLine(
-                time = event.endTime,
-            )
-        }
-
-        if (isLast && supplementButtonShow.value && !endTimeShow.value) {
-            SupplementButton()
-        }
+    val style = when (event.type) {
+        EventType.MAIN -> RecordItemStyle.Main
+        EventType.ADD -> RecordItemStyle.Add
+        EventType.INSERT -> RecordItemStyle.Insert
     }
+    val isSub = event.type != EventType.MAIN
+
+    if (isSub) { // 主题事件的开始和结束时间提到外边去了
+        TimeLabelWithLine(event)
+    }
+
+    OutlinedCardItemWithLine(
+        event = event,
+        style = style
+    )
+
+    if (isSub) {
+        TimeLabelWithLine(event, isStart = false)
+    }
+}
+
+@Composable
+fun TimeLabelWithLine(
+    event: InternalEvent,
+    isStart: Boolean = true,
+    textSize: TextUnit = 12.sp,
+) {
+    TimeLabel(
+        timeState = TimeState(
+            eventId = event.id,
+            isStart = isStart,
+            eventType = event.type,
+            initialTime = if (isStart) event.startTime else event.endTime,
+        ),
+        textSize = textSize
+    )
+
+    if (!isStart) return
+    VerticalLine()
 }
 
 @Composable
@@ -169,9 +168,6 @@ fun OutlinedCardItemWithLine(
 
         VerticalLine()
     }
-
-
-
 
 }
 
@@ -296,26 +292,6 @@ fun SupplementButton(viewModel: RecordPageViewModel = viewModel()) {
         }
     )
 
-}
-
-@Composable
-fun TimeLabelWithLine(
-    time: LocalDateTime?,
-    textSize: TextUnit = 12.sp,
-    withLine: Boolean = true,
-    viewModel: RecordPageViewModel = viewModel(),
-    // 在函数的参数中，下一个参数（指定默认值时）可以使用上一参数的值
-    selectedState: MutableState<Boolean> = viewModel.recordBlockState.timeLabelSelected
-) {
-    TimeLabel(
-        time = time,
-        textSize = textSize,
-        selectedState = selectedState,
-    )
-
-    if (withLine) {
-        VerticalLine()
-    }
 }
 
 @Preview(showBackground = true)
