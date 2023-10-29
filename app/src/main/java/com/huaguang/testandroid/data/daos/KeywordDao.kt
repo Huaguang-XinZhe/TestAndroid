@@ -19,11 +19,11 @@ interface KeywordDao {
     suspend fun getAllKeywordsWithCategories(): List<KeywordWithCategory>
 
     // 插入单个关键词
-    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertKeyword(keyword: Keyword): Long
 
     // 插入多个关键词
-    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertKeywords(keywords: List<Keyword>)
 
     // 更新单个关键词

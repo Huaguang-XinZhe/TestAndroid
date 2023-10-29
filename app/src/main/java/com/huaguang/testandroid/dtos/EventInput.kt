@@ -1,7 +1,7 @@
 package com.huaguang.testandroid.dtos
 
 data class EventInput(
-    val eventId: Int,
+    val eventId: Long,
     val name: String,
     val remark: String,
     val mode: Mode

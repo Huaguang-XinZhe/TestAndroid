@@ -3,7 +3,7 @@ package com.huaguang.testandroid.cache
 import com.huaguang.testandroid.data.repositories.CategoryRepository
 
 object CategoryCache {
-    private var categoryNameToIdMap: Map<String, Int>? = null
+    private var categoryNameToIdMap: Map<String, Long>? = null
 
     suspend fun initCache(categoryRepository: CategoryRepository) {
         if (categoryNameToIdMap == null) {
@@ -12,7 +12,7 @@ object CategoryCache {
         }
     }
 
-    fun getIdForCategoryName(categoryName: String?): Int? {
+    fun getIdForCategoryName(categoryName: String?): Long? {
         return categoryNameToIdMap?.get(categoryName)
     }
 

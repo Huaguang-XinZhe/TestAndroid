@@ -8,16 +8,16 @@ import java.time.LocalDateTime
 class EventRepository(private val eventDao: EventDao) {
     suspend fun insertEvent(event: Event) = eventDao.insert(event)
     suspend fun getAllEvents(): List<Event> = eventDao.getAllEvents()
-    suspend fun getEventById(eventId: Int): Event? = eventDao.getEventById(eventId)
+    suspend fun getEventById(eventId: Long): Event? = eventDao.getEventById(eventId)
 
     /**
      * 根据事件 id 更新事件名称、备注和类属 id
      */
     suspend fun updNameRemarkAndCategory(
-        eventId: Int,
+        eventId: Long,
         name: String,
         remark: String,
-        categoryId: Int?
+        categoryId: Long?
     ) {
         eventDao.updateNameRemarkAndCategoryById(eventId, name, remark, categoryId)
     }
@@ -26,7 +26,7 @@ class EventRepository(private val eventDao: EventDao) {
      * 根据事件 id 更新事件结束时间和持续时间
      */
     suspend fun updEndTimeAndDuration(
-        id: Int,
+        id: Long,
         endTime: LocalDateTime,
         duration: Duration
     ) {

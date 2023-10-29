@@ -2,6 +2,7 @@ package com.huaguang.testandroid.data.entities
 
 import androidx.room.Entity
 import androidx.room.ForeignKey
+import androidx.room.Index
 
 @Entity(
     tableName = "event_tag_mapping",
@@ -19,7 +20,8 @@ import androidx.room.ForeignKey
             childColumns = ["tagId"],
             onDelete = ForeignKey.SET_NULL
         )
-    ]
+    ],
+    indices = [Index("eventId"), Index("tagId")]
 )
 data class EventTagMapping(
     val eventId: Int,

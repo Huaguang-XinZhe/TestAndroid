@@ -9,6 +9,11 @@ class TrieNode {
 class KeywordClassifier {
     private val root = TrieNode()
 
+    /**
+     * 批量插入关键词。
+     *
+     * 其实内部调用了单个插入的方法。
+     */
     fun insert(keywords: List<String>, category: String) {
         keywords.forEach { keyword ->
             insert(keyword, category)
@@ -29,6 +34,9 @@ class KeywordClassifier {
         return null // 没有找到类属，就返回 null
     }
 
+    /**
+     * 单个插入的方法。
+     */
     fun insert(keyword: String, category: String) {
         var node = root
         for (ch in keyword) {

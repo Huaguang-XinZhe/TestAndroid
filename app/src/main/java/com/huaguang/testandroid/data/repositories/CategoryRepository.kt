@@ -6,6 +6,8 @@ import com.huaguang.testandroid.data.entities.Category
 
 class CategoryRepository(private val categoryDao: CategoryDao) {
 
+    suspend fun insertCategory(category: Category) = categoryDao.insert(category)
+
     suspend fun getAllCategories(): List<Category> = categoryDao.getAllCategories()
 
     /**
@@ -25,7 +27,7 @@ class CategoryRepository(private val categoryDao: CategoryDao) {
      *
      * 如果在缓存中未找到，则在类属表中插入一个新的类属，并返回其ID，然后更新缓存。
      */
-    suspend fun retrieveCategoryId(categoryName: String?): Int? {
+    suspend fun retrieveCategoryId(categoryName: String?): Long? {
         return if (categoryName != null) {
             // 从缓存中获取类属ID
             CategoryCache.getIdForCategoryName(categoryName) ?: run {
@@ -41,7 +43,5 @@ class CategoryRepository(private val categoryDao: CategoryDao) {
             }
         } else null
     }
-
-    private suspend fun insertCategory(category: Category) = categoryDao.insert(category)
 
 }

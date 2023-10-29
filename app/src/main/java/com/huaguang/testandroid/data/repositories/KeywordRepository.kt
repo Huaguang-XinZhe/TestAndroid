@@ -11,14 +11,16 @@ class KeywordRepository(private val keywordDao: KeywordDao) {
         return keywordDao.getAllKeywordsWithCategories()
     }
 
-    // 插入单个关键词
-    suspend fun insertKeyword(keyword: Keyword): Long {
-        return keywordDao.insertKeyword(keyword)
-    }
-
-    // 插入多个关键词
-    suspend fun insertKeywords(keywords: List<Keyword>) {
-        keywordDao.insertKeywords(keywords)
+    /**
+     * 批量插入多个关键词。
+     *
+     * @param keywords 关键词列表
+     * @param categoryId 关键词所属的类别ID
+     */
+    suspend fun insertKeywords(keywords: List<String>, categoryId: Long) {
+        keywords.map { keyword ->
+            Keyword(name = keyword, categoryId = categoryId)
+        }.also { keywordDao.insertKeywords(it) }
     }
 
     // 更新单个关键词

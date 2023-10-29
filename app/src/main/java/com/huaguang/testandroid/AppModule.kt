@@ -1,5 +1,6 @@
 package com.huaguang.testandroid
 
+import android.app.Application
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import com.huaguang.testandroid.buttons_bar.ButtonsBarState
@@ -12,6 +13,7 @@ import com.huaguang.testandroid.data.daos.TagDao
 import com.huaguang.testandroid.data.repositories.CategoryRepository
 import com.huaguang.testandroid.data.repositories.EventRepository
 import com.huaguang.testandroid.data.repositories.KeywordRepository
+import com.huaguang.testandroid.data.repositories.MainRepository
 import com.huaguang.testandroid.data.repositories.TagRepository
 import com.huaguang.testandroid.input_field.InputState
 import com.huaguang.testandroid.record_block.RecordBlockState
@@ -62,10 +64,14 @@ object AppModule {
         return SharedState()
     }
 
+    /**
+     * 注意，Application 类可以直接引用，但自定义的 MyApplication 不能，必须强制转换！
+     * 如果直接引用，构建的时候不会报错，但一旦调用到了数据库相关的代码，就会报错。
+     */
     @Singleton
     @Provides
-    fun provideAppDatabase(application: MyApplication): AppDatabase {
-        return application.database
+    fun provideAppDatabase(application: Application): AppDatabase {
+        return (application as MyApplication).database
     }
 
     @Singleton
@@ -110,6 +116,22 @@ object AppModule {
     @Provides
     fun provideKeywordRepository(keywordDao: KeywordDao): KeywordRepository {
         return KeywordRepository(keywordDao)
+    }
+
+    @Singleton
+    @Provides
+    fun provideMainRepository(
+        eventRepository: EventRepository,
+        categoryRepository: CategoryRepository,
+        tagRepository: TagRepository,
+        keywordRepository: KeywordRepository
+    ): MainRepository {
+        return MainRepository(
+            eventRepository,
+            categoryRepository,
+            tagRepository,
+            keywordRepository
+        )
     }
 
     @Provides
