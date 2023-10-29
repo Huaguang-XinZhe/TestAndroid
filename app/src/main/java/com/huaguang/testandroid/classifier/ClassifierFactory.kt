@@ -1,16 +1,17 @@
 package com.huaguang.testandroid.classifier
 
-object ClassifierFactory {
-    fun createClassifier(type: ClassifierType): ClassifierStrategy {
-        return when (type) {
-            ClassifierType.TYPE1 -> Classifier1()
-            ClassifierType.TYPE2 -> Classifier2()
-//            ClassifierType.TYPE3 -> Classifier3()
-        }
-    }
-}
+import com.huaguang.testandroid.data.repositories.KeywordRepository
 
-enum class ClassifierType {
-    TYPE1, TYPE2,
-//    TYPE3
+class ClassifierFactory(private val keywordRepository: KeywordRepository) {
+
+    suspend fun createKeywordClassifier(): KeywordClassifier {
+        val classifier = KeywordClassifier()
+        val keywordWithCategories = keywordRepository.getAllKeywordsWithCategories()
+
+        keywordWithCategories.forEach {
+            classifier.insert(it.keyword, it.category)
+        }
+
+        return classifier
+    }
 }

@@ -2,13 +2,12 @@ package com.huaguang.testandroid.viewmodels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.huaguang.testandroid.SharedState
 import com.huaguang.testandroid.cache.CategoryCache
-import com.huaguang.testandroid.classifier.ClassifierType
+import com.huaguang.testandroid.classifier.ClassifierFactory
+import com.huaguang.testandroid.classifier.KeywordClassifier
 import com.huaguang.testandroid.data.entities.Event
 import com.huaguang.testandroid.data.repositories.CategoryRepository
 import com.huaguang.testandroid.data.repositories.EventRepository
-import com.huaguang.testandroid.data.repositories.MainRepository
 import com.huaguang.testandroid.dtos.EventInput
 import com.huaguang.testandroid.getAdjustedDate
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -20,16 +19,19 @@ import javax.inject.Inject
 
 @HiltViewModel
 class MainViewModel @Inject constructor(
-    private val mainRepository: MainRepository,
     private val eventRepository: EventRepository,
     private val categoryRepository: CategoryRepository,
-    private val sharedState: SharedState
+    private val classifierFactory: ClassifierFactory,
 ) : ViewModel() {
 
+    private lateinit var classifier: KeywordClassifier
+
     init {
-        // 初始化类属缓存
         viewModelScope.launch(Dispatchers.IO) {
+            // 初始化类属缓存
             CategoryCache.initCache(categoryRepository)
+            // 初始化分类器
+            classifier = classifierFactory.createKeywordClassifier()
         }
     }
 
@@ -42,7 +44,7 @@ class MainViewModel @Inject constructor(
         val now = LocalDateTime.now()
         val eventDate = getAdjustedDate()
         val interval = Duration.between(lastEventEndTime, now).toMinutes().toInt()
-        val categoryId = CategoryCache.getIdForCategoryName()
+        val categoryId = getCategoryId(eventName)
 
         val event = Event(
             startTime = now,
@@ -64,10 +66,10 @@ class MainViewModel @Inject constructor(
             EventInput.Mode.UPDATE -> name
         }
 
-        val categoryName = sharedState.classify(classificationCriteria, ClassifierType.TYPE1)
+        val categoryId = getCategoryId(classificationCriteria)
 
         // 更新事件
-        mainRepository.updateEventWithCategory(eventInput.eventId, name, remark, categoryName)
+        eventRepository.updNameRemarkAndCategory(eventInput.eventId, name, remark, categoryId)
     }
 
     suspend fun stopCurrentEvent() {
@@ -81,6 +83,17 @@ class MainViewModel @Inject constructor(
     }
 
 
-
+    /**
+     * 获取事件类属 ID。
+     *
+     * 先用分类器对传入的分类材料进行分类，然后去缓存中找 id，
+     * 如果缓存中没有，则在数据库中插入一个新的类属，并返回其 ID，然后更新缓存。
+     *
+     * @param classificationCriteria 分类材料/依据
+     */
+    private suspend fun getCategoryId(classificationCriteria: String): Int? {
+        val categoryName = classifier.classify(classificationCriteria)
+        return categoryRepository.retrieveCategoryId(categoryName)
+    }
 
 }

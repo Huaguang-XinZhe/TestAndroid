@@ -12,7 +12,7 @@ object CategoryCache {
         }
     }
 
-    fun getIdForCategoryName(categoryName: String): Int? {
+    fun getIdForCategoryName(categoryName: String?): Int? {
         return categoryNameToIdMap?.get(categoryName)
     }
 

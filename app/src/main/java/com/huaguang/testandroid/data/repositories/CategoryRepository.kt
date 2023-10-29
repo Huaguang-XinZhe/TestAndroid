@@ -5,7 +5,7 @@ import com.huaguang.testandroid.data.daos.CategoryDao
 import com.huaguang.testandroid.data.entities.Category
 
 class CategoryRepository(private val categoryDao: CategoryDao) {
-    suspend fun insertCategory(category: Category) = categoryDao.insert(category)
+
     suspend fun getAllCategories(): List<Category> = categoryDao.getAllCategories()
 
     /**
@@ -41,5 +41,7 @@ class CategoryRepository(private val categoryDao: CategoryDao) {
             }
         } else null
     }
+
+    private suspend fun insertCategory(category: Category) = categoryDao.insert(category)
 
 }
