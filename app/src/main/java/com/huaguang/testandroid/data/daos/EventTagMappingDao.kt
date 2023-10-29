@@ -1,9 +1,9 @@
-package com.huaguang.testandroid.daos
+package com.huaguang.testandroid.data.daos
 
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
-import com.huaguang.testandroid.entities.EventTagMapping
+import com.huaguang.testandroid.data.entities.EventTagMapping
 
 @Dao
 interface EventTagMappingDao {

@@ -18,10 +18,6 @@ class MyApplication @Inject constructor() : Application() {
         )
     }
 
-    // 放到其他类当中
-    fun classify(name: String, type: ClassifierType): String? {
-        return classifier[type]?.classify(name)
-    }
 
 
 }

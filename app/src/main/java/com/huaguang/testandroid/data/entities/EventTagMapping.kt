@@ -1,4 +1,4 @@
-package com.huaguang.testandroid.entities
+package com.huaguang.testandroid.data.entities
 
 import androidx.room.Entity
 import androidx.room.ForeignKey

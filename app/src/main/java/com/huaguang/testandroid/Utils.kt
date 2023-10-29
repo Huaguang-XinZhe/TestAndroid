@@ -8,7 +8,9 @@ import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import java.time.Duration
+import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 
 fun LocalDateTime.format(): String {
@@ -36,6 +38,17 @@ fun Duration.format(englishUnit: Boolean = true): String {
         remainingMinutes == 0L -> "$hours$hUnit"
         else -> "$hours$hUnit$remainingMinutes$mUnit"
     }
+}
+
+fun getAdjustedDate(): LocalDate {
+    val now = LocalTime.now()
+    val midnight = LocalTime.MIDNIGHT
+    val fiveAM = LocalTime.of(5, 0)
+
+    return if (now.isAfter(midnight) && now.isBefore(fiveAM)) {
+        // 当前时间是在 0 点与凌晨 5 点之间
+        LocalDate.now().minusDays(1)
+    } else LocalDate.now()
 }
 
 fun Modifier.dashBorder(

@@ -1,4 +1,4 @@
-package com.huaguang.testandroid.entities
+package com.huaguang.testandroid.data.entities
 
 import androidx.room.Entity
 import androidx.room.ForeignKey
@@ -17,5 +17,5 @@ data class Category(
     @PrimaryKey(autoGenerate = true)
     val id: Int = 0,
     val name: String,
-    val parentId: Int?
+    var parentId: Int? = null,
 )
