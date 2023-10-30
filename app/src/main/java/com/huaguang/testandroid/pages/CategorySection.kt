@@ -21,7 +21,7 @@ import com.huaguang.testandroid.viewmodels.ClassificationViewModel
 
 @Composable
 fun CategorySection(viewModel: ClassificationViewModel = viewModel()) {
-    LazyColumn {
+    LazyColumn(modifier = Modifier.fillMaxWidth()) {
         items(viewModel.rootCategories) { category ->
             CategoryItem(category, viewModel.getSubCategories(category.id))
         }
@@ -40,7 +40,7 @@ fun CategoryItem(
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Text(text = category.name)
-            IconButton(onClick = { viewModel.onAddIconClick(category.id) }) {
+            IconButton(onClick = { viewModel.onAddCategoryClick(category.id) }) {
                 Icon(Icons.Default.Add, contentDescription = null)
             }
         }

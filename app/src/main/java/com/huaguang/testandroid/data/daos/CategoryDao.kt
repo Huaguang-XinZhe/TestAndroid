@@ -5,7 +5,9 @@ import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.Transaction
 import com.huaguang.testandroid.data.entities.Category
+import com.huaguang.testandroid.dtos.CategoryWithKeywords
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -48,6 +50,21 @@ interface CategoryDao {
 
     @Query("SELECT * FROM categories")
     fun getAllCategoriesFlow(): Flow<List<Category>>
+
+    /**
+     * 仅获取有关键词的类属和其对应的关键词。
+     *
+     * 没有关键词的类属不会返回到结果集中。
+     */
+    @Transaction
+    @Query("""
+        SELECT DISTINCT categories.* 
+        FROM categories 
+        JOIN keywords ON categories.id = keywords.categoryId
+    """)
+    fun getCategoriesWithKeywordsFlow(): Flow<List<CategoryWithKeywords>>
+
+
 
 
 }

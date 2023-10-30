@@ -5,7 +5,6 @@ import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import androidx.room.Update
 import com.huaguang.testandroid.data.entities.Keyword
 import com.huaguang.testandroid.dtos.KeywordWithCategory
 
@@ -26,10 +25,6 @@ interface KeywordDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertKeywords(keywords: List<Keyword>)
 
-    // 更新单个关键词
-    @Update
-    suspend fun updateKeyword(keyword: Keyword)
-
     // 删除单个关键词
     @Delete
     suspend fun deleteKeyword(keyword: Keyword)
@@ -42,4 +37,10 @@ interface KeywordDao {
     // 通过类别ID查询所有关键词
     @Query("SELECT * FROM keywords WHERE categoryId = :categoryId")
     suspend fun findKeywordsByCategoryId(categoryId: Int): List<Keyword>
+
+    /**
+     * 通过 id 更新关键词的名称。
+     */
+    @Query("UPDATE keywords SET name = :newName WHERE id = :id")
+    suspend fun updateKeywordNameById(id: Long, newName: String)
 }

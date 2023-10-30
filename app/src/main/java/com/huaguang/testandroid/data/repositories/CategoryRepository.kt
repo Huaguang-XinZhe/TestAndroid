@@ -3,6 +3,9 @@ package com.huaguang.testandroid.data.repositories
 import com.huaguang.testandroid.cache.CategoryCache
 import com.huaguang.testandroid.data.daos.CategoryDao
 import com.huaguang.testandroid.data.entities.Category
+import com.huaguang.testandroid.data.entities.Keyword
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 
 class CategoryRepository(private val categoryDao: CategoryDao) {
 
@@ -50,5 +53,12 @@ class CategoryRepository(private val categoryDao: CategoryDao) {
     }
 
     fun getAllCategoriesFlow() = categoryDao.getAllCategoriesFlow()
+
+    fun getCategoryToKeywordsMapFlow(): Flow<Map<Category, List<Keyword>>> {
+        return categoryDao.getCategoriesWithKeywordsFlow()
+            .map { categoriesWithKeywords ->
+                categoriesWithKeywords.associateBy({ it.category }, { it.keywords })
+            }
+    }
 
 }

@@ -6,13 +6,11 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -66,7 +64,8 @@ fun LongPressIconButton(
 ) {
     Box(
         contentAlignment = Alignment.Center,
-        modifier = modifier.padding(5.dp)
+        modifier = modifier
+            .padding(5.dp)
             .size(40.dp)
             .clip(CircleShape)
             .combinedClickable(
@@ -115,9 +114,42 @@ fun LongPressOutlinedIconButton(
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+fun LongPressOutlinedButton(
+    modifier: Modifier = Modifier,
+    text: String,
+    onClick: () -> Unit, 
+    onLongClick: () -> Unit
+) {
+    Box(
+        modifier = modifier
+            .clip(CircleShape)
+            .border(0.6.dp, Color.Black, CircleShape)
+            .combinedClickable(
+                interactionSource = remember { MutableInteractionSource() },
+                indication = rememberRipple(bounded = false),
+                onClick = onClick,
+                onLongClick = onLongClick,
+            ),
+    ) {
+        Text(
+            text = text,
+            color = Color.Black,
+            modifier = Modifier.padding(horizontal = 12.dp, vertical = 5.dp)
+        )
+    }
+}
+
 @Preview(showBackground = true)
 @Composable
 fun LongPressTest() {
+    
+    Box(modifier = Modifier.padding(10.dp)) {
+        LongPressOutlinedButton(text = "核心", onClick = { /*TODO*/ }) {
+
+        }
+    }
 
 //    Row(
 //        verticalAlignment = Alignment.CenterVertically,
@@ -136,25 +168,25 @@ fun LongPressTest() {
 //        }
 //    }
 
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier.padding(10.dp)
-    ) {
-        LongPressIconButton(
-            iconRes = R.drawable.stop,
-            onClick = { /*TODO*/ },
-
-        ) {
-
-        }
-
-        IconButton(onClick = { /*TODO*/ }) {
-            Icon(
-                painter = painterResource(id = R.drawable.stop),
-                contentDescription = null,
-                modifier = Modifier.size(24.dp)
-            )
-        }
-    }
+//    Row(
+//        verticalAlignment = Alignment.CenterVertically,
+//        modifier = Modifier.padding(10.dp)
+//    ) {
+//        LongPressIconButton(
+//            iconRes = R.drawable.stop,
+//            onClick = { /*TODO*/ },
+//
+//        ) {
+//
+//        }
+//
+//        IconButton(onClick = { /*TODO*/ }) {
+//            Icon(
+//                painter = painterResource(id = R.drawable.stop),
+//                contentDescription = null,
+//                modifier = Modifier.size(24.dp)
+//            )
+//        }
+//    }
 
 }

@@ -11,6 +11,7 @@ class KeywordRepository(private val keywordDao: KeywordDao) {
         return keywordDao.getAllKeywordsWithCategories()
     }
 
+
     /**
      * 批量插入多个关键词。
      *
@@ -21,11 +22,6 @@ class KeywordRepository(private val keywordDao: KeywordDao) {
         keywords.map { keyword ->
             Keyword(name = keyword, categoryId = categoryId)
         }.also { keywordDao.insertKeywords(it) }
-    }
-
-    // 更新单个关键词
-    suspend fun updateKeyword(keyword: Keyword) {
-        keywordDao.updateKeyword(keyword)
     }
 
     // 删除单个关键词
@@ -42,6 +38,14 @@ class KeywordRepository(private val keywordDao: KeywordDao) {
     suspend fun findKeywordsByCategoryId(categoryId: Int): List<Keyword> {
         return keywordDao.findKeywordsByCategoryId(categoryId)
     }
+
+    /**
+     * 通过 id 更新关键词的名称。
+     */
+    suspend fun updateKeywordName(id: Long, newName: String) {
+        keywordDao.updateKeywordNameById(id, newName)
+    }
+
 
 }
 

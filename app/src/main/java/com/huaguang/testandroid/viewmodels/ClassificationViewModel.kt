@@ -1,5 +1,6 @@
 package com.huaguang.testandroid.viewmodels
 
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
@@ -9,33 +10,37 @@ import com.huaguang.testandroid.data.entities.Category
 import com.huaguang.testandroid.data.entities.Keyword
 import com.huaguang.testandroid.data.entities.Tag
 import com.huaguang.testandroid.data.repositories.CategoryRepository
-import com.huaguang.testandroid.data.repositories.MainRepository
+import com.huaguang.testandroid.data.repositories.KeywordRepository
+import com.huaguang.testandroid.dialog.DialogState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class ClassificationViewModel @Inject constructor(
-    private val mainRepository: MainRepository,
     private val categoryRepository: CategoryRepository,
+    private val keywordRepository: KeywordRepository,
 ): ViewModel() {
-    val keywords = mutableStateListOf<Keyword>() // TODO: 有点问题，不要放在这里
     val tags = mutableStateListOf<Tag>() // TODO: 有点问题，不要放在这里
     val rootCategories = mutableStateListOf<Category>()
+
     /**
      * 按 parentId 分组的子类属列表。
      *
      * 除去了根类属，也即 parentId 为 null 的情况。
      */
     private val subCategoriesMap = mutableStateMapOf<Long, List<Category>>()
-    val showDialog = mutableStateOf(false)
+
     /**
-     * 缓存父类属的 id，不为 null。
-     *
-     * 在某个类属下新增子类属时需要。
-     * 全局只维护一个实例，每次新增类属时替换。
+     * 至少有一个关键词的类属及其关联的关键词组成的 Map，Flow 类型。
      */
-    private var parentId: Long = 0
+    val categoryToKeywordsMapFlow = categoryRepository.getCategoryToKeywordsMapFlow()
+
+    /**
+     * 适用于新增类属、新增关键词、更新关键词的对话框的状态。
+     */
+    val dialogState: MutableState<DialogState> = mutableStateOf(DialogState.Hidden)
+
 
     init {
         viewModelScope.launch {
@@ -45,15 +50,6 @@ class ClassificationViewModel @Inject constructor(
         }
     }
 
-    /**
-     * 新增图标点击。
-     *
-     * 显示新增对话框，并更新父类属 id 的缓存。
-     */
-    fun onAddIconClick(parentId: Long) {
-        showDialog.value = true
-        this.parentId = parentId
-    }
 
     fun fetchTags() {
         TODO("Not yet implemented")
@@ -81,20 +77,6 @@ class ClassificationViewModel @Inject constructor(
     }
 
     /**
-     * 新增类属的实质方法。
-     *
-     * 对话框点击确定后调用。
-     */
-    fun addCategory(name: String) {
-        viewModelScope.launch {
-            // 1. 构建新的类属
-            val category = Category(name = name, parentId = parentId)
-            // 2. 插入数据库
-            categoryRepository.insertCategory(category)
-        }
-    }
-
-    /**
      * 从类属仓库获取所有类属，并更新 [rootCategories] 和 [subCategoriesMap]。
      */
     private suspend fun fetchAllCategories() {
@@ -109,6 +91,43 @@ class ClassificationViewModel @Inject constructor(
                 subCategoriesMap.clear()
                 subCategoriesMap.putAll(groupedByParent)
             }
+    }
+
+    fun onKeywordClick(keyword: Keyword) {
+        dialogState.value = DialogState.UpdateKeyword(
+            initialValue = keyword.name,
+            onConfirm = { newName ->
+                viewModelScope.launch {
+                    keywordRepository.updateKeywordName(keyword.id, newName)
+                }
+            }
+        )
+    }
+
+    fun onAddKeywordClick(categoryId: Long) {
+        dialogState.value = DialogState.AddKeyword(
+            onConfirm = { keyword ->
+                viewModelScope.launch {
+                    // 对输入进行处理，得到关键词列表
+                    val keywords = keyword.trim().split("，", ",", "\n")
+                    keywordRepository.insertKeywords(keywords, categoryId)
+                }
+            }
+        )
+    }
+
+    fun onAddCategoryClick(parentId: Long) {
+        dialogState.value = DialogState.AddCategory(
+            onConfirm = { name ->
+                viewModelScope.launch {
+                    // 1. 构建新的类属
+                    val category = Category(name = name, parentId = parentId)
+                    // 2. 插入数据库
+                    // TODO: 允许批量插入
+                    categoryRepository.insertCategory(category)
+                }
+            }
+        )
     }
 
 }
