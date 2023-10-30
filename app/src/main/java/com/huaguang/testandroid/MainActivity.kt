@@ -5,8 +5,7 @@ import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
-import androidx.compose.material3.Button
-import androidx.compose.material3.Text
+import com.huaguang.testandroid.pages.ClassificationPage
 import com.huaguang.testandroid.viewmodels.MainViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
@@ -25,9 +24,10 @@ class MainActivity : ComponentActivity() {
 
         setContent {
 //            RecordPage()
-            Button(onClick = { mainViewModel.insertPresetData() }) {
-                Text(text = "插入预置数据")
-            }
+//            Button(onClick = { mainViewModel.insertPresetData() }) {
+//                Text(text = "插入预置数据")
+//            }
+            ClassificationPage()
         }
 
         sharedState.toastMessage.observe(this) { message ->

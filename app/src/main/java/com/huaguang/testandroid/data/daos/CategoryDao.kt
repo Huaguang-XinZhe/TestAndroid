@@ -6,14 +6,13 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import com.huaguang.testandroid.data.entities.Category
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface CategoryDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(category: Category): Long
 
-    @Query("SELECT * FROM categories")
-    suspend fun getAllCategories(): List<Category>
 
     /**
      * 获取没有子类属的类属。
@@ -46,6 +45,9 @@ interface CategoryDao {
 
     @Delete
     suspend fun delete(category: Category)
+
+    @Query("SELECT * FROM categories")
+    fun getAllCategoriesFlow(): Flow<List<Category>>
 
 
 }

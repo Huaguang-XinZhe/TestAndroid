@@ -8,8 +8,6 @@ class CategoryRepository(private val categoryDao: CategoryDao) {
 
     suspend fun insertCategory(category: Category) = categoryDao.insert(category)
 
-    suspend fun getAllCategories(): List<Category> = categoryDao.getAllCategories()
-
     /**
      * 获取没有子类属的类属。包括底层类属和那些没有父类属的类属。
      */
@@ -50,5 +48,7 @@ class CategoryRepository(private val categoryDao: CategoryDao) {
             }
         } else null
     }
+
+    fun getAllCategoriesFlow() = categoryDao.getAllCategoriesFlow()
 
 }
