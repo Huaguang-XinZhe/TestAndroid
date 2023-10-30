@@ -11,16 +11,23 @@ class CategoryRepository(private val categoryDao: CategoryDao) {
     suspend fun getAllCategories(): List<Category> = categoryDao.getAllCategories()
 
     /**
-     * 获取没有子类属的类属。
+     * 获取没有子类属的类属。包括底层类属和那些没有父类属的类属。
      */
     suspend fun getCategoriesWithoutChildren() = categoryDao.getCategoriesWithoutChildren()
 
-    suspend fun findCategoryIdByName(name: String): Int? {
+    suspend fun findCategoryIdByName(name: String): Long? {
         return categoryDao.findCategoryIdByName(name)
     }
 
-    suspend fun getCategoryById(categoryId: Int): Category? = categoryDao.getCategoryById(categoryId)
+    suspend fun getCategoryById(id: Long): Category? = categoryDao.getCategoryById(id)
     suspend fun deleteCategory(category: Category) = categoryDao.delete(category)
+
+    /**
+     * 根据类属 id 更新类属名。
+     */
+    suspend fun updateCategoryName(id: Long, newName: String) {
+        categoryDao.updateCategoryNameById(id, newName)
+    }
 
     /**
      * 根据类属名称获取类属 ID。

@@ -21,4 +21,12 @@ interface TagDao {
     @Delete
     suspend fun delete(tag: Tag)
 
+    /**
+     * 一次性插入多个 tag。
+     *
+     * @return 返回插入的 tag 的 id 列表。
+     */
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertTags(tags: List<Tag>): List<Long>
+
 }

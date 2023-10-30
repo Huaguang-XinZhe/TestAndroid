@@ -22,6 +22,12 @@ interface EventDao {
     suspend fun getEventById(eventId: Long): Event?
 
     /**
+     * 根据事件 id 获取类属 id。
+     */
+    @Query("SELECT categoryId FROM events WHERE id = :id")
+    suspend fun getCategoryIdById(id: Long): Long?
+
+    /**
      * 根据事件 id 更新事件名称、备注和类属 id
      */
     @Query("""
@@ -40,6 +46,16 @@ interface EventDao {
         WHERE id = :id
     """)
     suspend fun updateEndTimeAndDurationById(id: Long, endTime: LocalDateTime, duration: Duration)
+
+    /**
+     * 根据事件 id 更新类属 id。
+     */
+    @Query("""
+        UPDATE events
+        SET categoryId = :categoryId
+        WHERE id = :eventId
+    """)
+    suspend fun updateCategoryIdById(eventId: Long, categoryId: Long)
 
     @Delete
     suspend fun delete(event: Event)

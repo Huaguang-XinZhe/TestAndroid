@@ -12,18 +12,18 @@ import androidx.room.Index
             entity = Event::class,
             parentColumns = ["id"],
             childColumns = ["eventId"],
-            onDelete = ForeignKey.CASCADE
+            onDelete = ForeignKey.CASCADE // 事件删除，那对应的映射也删除
         ),
         ForeignKey(
             entity = Tag::class,
             parentColumns = ["id"],
             childColumns = ["tagId"],
-            onDelete = ForeignKey.SET_NULL
+            onDelete = ForeignKey.SET_NULL // 标签删除，那对应的映射就置空
         )
     ],
     indices = [Index("eventId"), Index("tagId")]
 )
 data class EventTagMapping(
-    val eventId: Int,
-    val tagId: Int
+    val eventId: Long,
+    val tagId: Long
 )

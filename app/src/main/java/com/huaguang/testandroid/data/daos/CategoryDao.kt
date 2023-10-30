@@ -28,11 +28,21 @@ interface CategoryDao {
     """)
     suspend fun getCategoriesWithoutChildren(): List<Category>
 
+    /**
+     * 根据类属 id 更新类属名。
+     */
+    @Query("""
+        UPDATE categories
+        SET name = :newName
+        WHERE id = :id
+    """)
+    suspend fun updateCategoryNameById(id: Long, newName: String)
+
     @Query("SELECT id FROM categories WHERE name = :name")
-    suspend fun findCategoryIdByName(name: String): Int?
+    suspend fun findCategoryIdByName(name: String): Long?
 
     @Query("SELECT * FROM categories WHERE id = :categoryId")
-    suspend fun getCategoryById(categoryId: Int): Category?
+    suspend fun getCategoryById(categoryId: Long): Category?
 
     @Delete
     suspend fun delete(category: Category)

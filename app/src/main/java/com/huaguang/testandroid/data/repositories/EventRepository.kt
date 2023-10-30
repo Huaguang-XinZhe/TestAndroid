@@ -11,6 +11,13 @@ class EventRepository(private val eventDao: EventDao) {
     suspend fun getEventById(eventId: Long): Event? = eventDao.getEventById(eventId)
 
     /**
+     * 根据事件 id 查询类属 id。
+     */
+    suspend fun getCategoryId(id: Long): Long? {
+        return eventDao.getCategoryIdById(id)
+    }
+
+    /**
      * 根据事件 id 更新事件名称、备注和类属 id
      */
     suspend fun updNameRemarkAndCategory(
@@ -31,6 +38,13 @@ class EventRepository(private val eventDao: EventDao) {
         duration: Duration
     ) {
         eventDao.updateEndTimeAndDurationById(id, endTime, duration)
+    }
+
+    /**
+     * 根据事件 id 更新类属 id。
+     */
+    suspend fun updateCategoryId(eventId: Long, categoryId: Long) {
+        eventDao.updateCategoryIdById(eventId, categoryId)
     }
 
 

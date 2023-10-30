@@ -8,10 +8,12 @@ import com.huaguang.testandroid.classifier.ClassifierFactory
 import com.huaguang.testandroid.data.AppDatabase
 import com.huaguang.testandroid.data.daos.CategoryDao
 import com.huaguang.testandroid.data.daos.EventDao
+import com.huaguang.testandroid.data.daos.EventTagMappingDao
 import com.huaguang.testandroid.data.daos.KeywordDao
 import com.huaguang.testandroid.data.daos.TagDao
 import com.huaguang.testandroid.data.repositories.CategoryRepository
 import com.huaguang.testandroid.data.repositories.EventRepository
+import com.huaguang.testandroid.data.repositories.EventTagMappingRepository
 import com.huaguang.testandroid.data.repositories.KeywordRepository
 import com.huaguang.testandroid.data.repositories.MainRepository
 import com.huaguang.testandroid.data.repositories.TagRepository
@@ -120,17 +122,25 @@ object AppModule {
 
     @Singleton
     @Provides
+    fun provideEventTagMappingRepository(eventTagMappingDao: EventTagMappingDao): EventTagMappingRepository {
+        return EventTagMappingRepository(eventTagMappingDao)
+    }
+
+    @Singleton
+    @Provides
     fun provideMainRepository(
         eventRepository: EventRepository,
         categoryRepository: CategoryRepository,
         tagRepository: TagRepository,
-        keywordRepository: KeywordRepository
+        keywordRepository: KeywordRepository,
+        eventTagMappingRepository: EventTagMappingRepository
     ): MainRepository {
         return MainRepository(
             eventRepository,
             categoryRepository,
             tagRepository,
-            keywordRepository
+            keywordRepository,
+            eventTagMappingRepository
         )
     }
 
