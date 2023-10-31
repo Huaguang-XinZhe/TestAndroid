@@ -10,7 +10,8 @@ import com.huaguang.testandroid.data.entities.Category
 import com.huaguang.testandroid.data.entities.Keyword
 import com.huaguang.testandroid.data.repositories.CategoryRepository
 import com.huaguang.testandroid.data.repositories.KeywordRepository
-import com.huaguang.testandroid.dialog.DialogState
+import com.huaguang.testandroid.dialog.DeleteDialogState
+import com.huaguang.testandroid.dialog.InputDialogState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -37,7 +38,8 @@ class ClassificationViewModel @Inject constructor(
     /**
      * 适用于新增类属、新增关键词、更新关键词的对话框的状态。
      */
-    val dialogState: MutableState<DialogState> = mutableStateOf(DialogState.Hidden)
+    val inputDialogState: MutableState<InputDialogState> = mutableStateOf(InputDialogState.Hidden)
+    val deleteDialogState: MutableState<DeleteDialogState> = mutableStateOf(DeleteDialogState.Hidden)
 
 
     init {
@@ -57,6 +59,44 @@ class ClassificationViewModel @Inject constructor(
         return subCategoriesMap[parentId] ?: emptyList()
     }
 
+
+    fun onKeywordClick(keyword: Keyword) {
+        inputDialogState.value = InputDialogState.UpdateKeyword(
+            initialValue = keyword.name,
+            onConfirm = { newName ->
+                viewModelScope.launch {
+                    keywordRepository.updateKeywordName(keyword.id, newName)
+                }
+            }
+        )
+    }
+
+    fun onAddKeywordClick(categoryId: Long) {
+        inputDialogState.value = InputDialogState.AddKeyword(
+            onConfirm = { keyword ->
+                viewModelScope.launch {
+                    // 对输入进行处理，得到关键词列表
+                    val keywords = keyword.trim().split("，", ",", "\n")
+                    keywordRepository.insertKeywords(keywords, categoryId)
+                }
+            }
+        )
+    }
+
+    fun onAddCategoryClick(parentId: Long) {
+        inputDialogState.value = InputDialogState.AddCategory(
+            onConfirm = { name ->
+                viewModelScope.launch {
+                    // 1. 构建新的类属
+                    val category = Category(name = name, parentId = parentId)
+                    // 2. 插入数据库
+                    // TODO: 允许批量插入
+                    categoryRepository.insertCategory(category)
+                }
+            }
+        )
+    }
+
     /**
      * 从类属仓库获取所有类属，并更新 [rootCategories] 和 [subCategoriesMap]。
      */
@@ -74,38 +114,11 @@ class ClassificationViewModel @Inject constructor(
             }
     }
 
-    fun onKeywordClick(keyword: Keyword) {
-        dialogState.value = DialogState.UpdateKeyword(
-            initialValue = keyword.name,
-            onConfirm = { newName ->
+    fun onKeywordLongClick(keyword: Keyword) {
+        deleteDialogState.value = DeleteDialogState.DeleteKeyword(
+            onConfirm = {
                 viewModelScope.launch {
-                    keywordRepository.updateKeywordName(keyword.id, newName)
-                }
-            }
-        )
-    }
-
-    fun onAddKeywordClick(categoryId: Long) {
-        dialogState.value = DialogState.AddKeyword(
-            onConfirm = { keyword ->
-                viewModelScope.launch {
-                    // 对输入进行处理，得到关键词列表
-                    val keywords = keyword.trim().split("，", ",", "\n")
-                    keywordRepository.insertKeywords(keywords, categoryId)
-                }
-            }
-        )
-    }
-
-    fun onAddCategoryClick(parentId: Long) {
-        dialogState.value = DialogState.AddCategory(
-            onConfirm = { name ->
-                viewModelScope.launch {
-                    // 1. 构建新的类属
-                    val category = Category(name = name, parentId = parentId)
-                    // 2. 插入数据库
-                    // TODO: 允许批量插入
-                    categoryRepository.insertCategory(category)
+                    keywordRepository.deleteKeyword(keyword)
                 }
             }
         )

@@ -34,6 +34,7 @@ fun KeywordRow(
                 onClick = { viewModel.onKeywordClick(keyword) },
             ) {
                 // 长按删除
+                viewModel.onKeywordLongClick(keyword)
             }
         }
 

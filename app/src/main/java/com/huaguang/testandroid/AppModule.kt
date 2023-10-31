@@ -27,7 +27,7 @@ import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 
 @Module
-@InstallIn(SingletonComponent::class) // TODO: 为什么引入这一句？
+@InstallIn(SingletonComponent::class)
 object AppModule {
 
     @Singleton

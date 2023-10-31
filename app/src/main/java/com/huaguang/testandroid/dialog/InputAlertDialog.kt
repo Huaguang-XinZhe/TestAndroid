@@ -22,10 +22,10 @@ import kotlinx.coroutines.delay
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun InputAlertDialog(
-    dialogState: MutableState<DialogState>,
-    onDismiss: () -> Unit = { dialogState.value = DialogState.Hidden },
+    inputDialogState: MutableState<InputDialogState>,
+    onDismiss: () -> Unit = { inputDialogState.value = InputDialogState.Hidden },
 ) {
-    dialogState.value.apply {
+    inputDialogState.value.apply {
         if (!show) return
 
         // 每次重组都会重新调用，以获取最新的初始值

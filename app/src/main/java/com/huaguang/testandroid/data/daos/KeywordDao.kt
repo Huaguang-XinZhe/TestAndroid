@@ -29,10 +29,6 @@ interface KeywordDao {
     @Delete
     suspend fun deleteKeyword(keyword: Keyword)
 
-    // 通过ID删除关键词
-    @Query("DELETE FROM keywords WHERE id = :id")
-    suspend fun deleteKeywordById(id: Int)
-
 
     // 通过类别ID查询所有关键词
     @Query("SELECT * FROM keywords WHERE categoryId = :categoryId")

@@ -29,10 +29,6 @@ class KeywordRepository(private val keywordDao: KeywordDao) {
         keywordDao.deleteKeyword(keyword)
     }
 
-    // 通过ID删除关键词
-    suspend fun deleteKeywordById(id: Int) {
-        keywordDao.deleteKeywordById(id)
-    }
 
     // 通过类别ID查询所有关键词
     suspend fun findKeywordsByCategoryId(categoryId: Int): List<Keyword> {
