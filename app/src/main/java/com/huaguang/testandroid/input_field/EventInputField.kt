@@ -42,7 +42,7 @@ fun EventInputField(
         TextField(
             value = textFieldState,
             onValueChange = { textFieldState = it },
-            label = { Text("事件名称") },
+            label = { Text("Event Name") },
             modifier = Modifier
                 .weight(1f)
                 .focusRequester(focusRequester)

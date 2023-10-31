@@ -5,12 +5,12 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.huaguang.testandroid.buttons_bar.ButtonsBarState
+import com.huaguang.testandroid.cache.TimeCache
 import com.huaguang.testandroid.input_field.InputState
 import com.huaguang.testandroid.record_block.CurrentType
 import com.huaguang.testandroid.record_block.EventType
 import com.huaguang.testandroid.record_block.InternalEvent
 import com.huaguang.testandroid.record_block.RecordBlockState
-import com.huaguang.testandroid.record_block.TimeCache
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay

@@ -4,6 +4,7 @@ import android.app.Application
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import com.huaguang.testandroid.buttons_bar.ButtonsBarState
+import com.huaguang.testandroid.cache.TimeCache
 import com.huaguang.testandroid.classifier.ClassifierFactory
 import com.huaguang.testandroid.data.AppDatabase
 import com.huaguang.testandroid.data.daos.CategoryDao
@@ -19,7 +20,6 @@ import com.huaguang.testandroid.data.repositories.MainRepository
 import com.huaguang.testandroid.data.repositories.TagRepository
 import com.huaguang.testandroid.input_field.InputState
 import com.huaguang.testandroid.record_block.RecordBlockState
-import com.huaguang.testandroid.record_block.TimeCache
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

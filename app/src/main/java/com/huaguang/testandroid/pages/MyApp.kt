@@ -9,6 +9,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.huaguang.testandroid.RecordPage
 import com.huaguang.testandroid.pages.class_page.ClassificationPage
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -34,12 +35,10 @@ fun MyApp() {
                 composable(route = page.route) {
                     // 根据当前路由显示对应的页面组件
                     when (page) {
-                        is Page.Record -> RecordPage()
+                        is Page.Record -> RecordPage(hiltViewModel())
                         is Page.List -> ListPage()
                         is Page.Statistic -> StatisticPage()
-                        is Page.Classification -> {
-                            ClassificationPage(hiltViewModel())
-                        }
+                        is Page.Classification -> ClassificationPage(hiltViewModel())
                     }
                 }
             }
@@ -47,11 +46,6 @@ fun MyApp() {
     }
 }
 
-// 下面是页面组件的占位符实现，你可以根据实际情况进行完善
-@Composable
-fun RecordPage() {
-    // Record 页面的内容
-}
 
 @Composable
 fun ListPage() {

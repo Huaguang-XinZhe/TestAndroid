@@ -10,14 +10,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.huaguang.testandroid.buttons_bar.EventButtonsBar
 import com.huaguang.testandroid.input_field.EventInputField
 import com.huaguang.testandroid.record_block.ExploratoryRecordBlock
 
 @Composable
 fun RecordPage(
-    viewModel: RecordPageViewModel = viewModel()
+    viewModel: RecordPageViewModel
 ) {
     val events = viewModel.events
     val selected = viewModel.recordBlockState.timeLabelSelected.value
@@ -82,5 +81,5 @@ fun RecordPage(
 @Preview(showBackground = true)
 @Composable
 fun RecordPageTest() {
-    RecordPage()
+//    RecordPage()
 }

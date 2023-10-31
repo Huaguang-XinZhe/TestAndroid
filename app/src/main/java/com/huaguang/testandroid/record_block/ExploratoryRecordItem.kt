@@ -29,7 +29,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.huaguang.testandroid.RecordPageViewModel
-import com.huaguang.testandroid.TimeState
 import com.huaguang.testandroid.format
 import com.huaguang.testandroid.widget.Label
 import com.huaguang.testandroid.widget.LabelType
@@ -115,17 +114,17 @@ fun TimeLabelWithLine(
     isStart: Boolean = true,
     textSize: TextUnit = 12.sp,
 ) {
-    TimeLabel(
-        timeState = TimeState(
-            eventId = event.id,
-            isStart = isStart,
-            eventType = event.type,
-            initialTime = if (isStart) event.startTime else event.endTime,
-        ),
-        textSize = textSize
-    )
-
-    if (!isStart) return
+//    TimeLabel(
+//        timeState = TimeState(
+//            eventId = event.id,
+//            isStart = isStart,
+//            eventType = event.type,
+//            initialTime = if (isStart) event.startTime else event.endTime,
+//        ),
+//        textSize = textSize
+//    )
+//
+//    if (!isStart) return
     VerticalLine()
 }
 
@@ -348,6 +347,7 @@ fun ExploratoryRecordItemTest() {
 
     val events = listOf(internalEvent, internalEvent1, )
 
-    ExploratoryRecordBlock(events = events)
+//    ExploratoryRecordBlock(events = events)
 
+    TimeLabelWithLine(event = internalEvent)
 }
