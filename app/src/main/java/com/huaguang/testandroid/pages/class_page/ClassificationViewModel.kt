@@ -1,4 +1,4 @@
-package com.huaguang.testandroid.viewmodels
+package com.huaguang.testandroid.pages.class_page
 
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateListOf
@@ -8,7 +8,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.huaguang.testandroid.data.entities.Category
 import com.huaguang.testandroid.data.entities.Keyword
-import com.huaguang.testandroid.data.entities.Tag
 import com.huaguang.testandroid.data.repositories.CategoryRepository
 import com.huaguang.testandroid.data.repositories.KeywordRepository
 import com.huaguang.testandroid.dialog.DialogState
@@ -21,7 +20,6 @@ class ClassificationViewModel @Inject constructor(
     private val categoryRepository: CategoryRepository,
     private val keywordRepository: KeywordRepository,
 ): ViewModel() {
-    val tags = mutableStateListOf<Tag>() // TODO: 有点问题，不要放在这里
     val rootCategories = mutableStateListOf<Category>()
 
     /**
@@ -48,23 +46,6 @@ class ClassificationViewModel @Inject constructor(
             // 进而导致可能存在的无限循环问题！
             fetchAllCategories()
         }
-    }
-
-
-    fun fetchTags() {
-        TODO("Not yet implemented")
-    }
-
-    fun deleteTag(tag: Tag) {
-        TODO("Not yet implemented")
-    }
-
-    fun deleteKeyword(keyword: Keyword) {
-        TODO("Not yet implemented")
-    }
-
-    fun fetchKeywords() {
-        TODO("Not yet implemented")
     }
 
     /**

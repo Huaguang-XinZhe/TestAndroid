@@ -1,12 +1,10 @@
-package com.huaguang.testandroid.pages
+package com.huaguang.testandroid.pages.class_page
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.Icon
@@ -17,16 +15,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.huaguang.testandroid.data.entities.Category
-import com.huaguang.testandroid.viewmodels.ClassificationViewModel
-
-@Composable
-fun CategorySection(viewModel: ClassificationViewModel = viewModel()) {
-    LazyColumn(modifier = Modifier.fillMaxWidth()) {
-        items(viewModel.rootCategories) { category ->
-            CategoryItem(category, viewModel.getSubCategories(category.id))
-        }
-    }
-}
 
 @Composable
 fun CategoryItem(
@@ -45,7 +33,7 @@ fun CategoryItem(
             }
         }
         subCategories.forEach {
-            CategoryItem(it, viewModel.getSubCategories(it.id))
+            CategoryItem(category = it, subCategories = viewModel.getSubCategories(it.id))
         }
     }
 }

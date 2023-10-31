@@ -5,7 +5,7 @@ import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
-import com.huaguang.testandroid.pages.ClassificationPage
+import com.huaguang.testandroid.pages.class_page.ClassificationPage
 import com.huaguang.testandroid.viewmodels.MainViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
