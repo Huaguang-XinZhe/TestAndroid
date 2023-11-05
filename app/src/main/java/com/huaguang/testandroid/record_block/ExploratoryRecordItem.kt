@@ -1,5 +1,6 @@
 package com.huaguang.testandroid.record_block
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -24,12 +25,15 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.huaguang.testandroid.RecordPageViewModel
+import com.huaguang.testandroid.TAG
 import com.huaguang.testandroid.format
+import com.huaguang.testandroid.time_label.BusinessTimeLabel
+import com.huaguang.testandroid.time_label.TimeLabelState
+import com.huaguang.testandroid.time_label.TimeLabelType
 import com.huaguang.testandroid.widget.Label
 import com.huaguang.testandroid.widget.LabelType
 import com.huaguang.testandroid.widget.LongPressOutlinedIconButton
@@ -54,10 +58,9 @@ fun ExploratoryRecordBlock(
 
         TimeLabelWithLine(
             event = mainEvent,
-            textSize = 16.sp
         )
 
-        events.forEachIndexed { index, internalEvent ->
+        events.forEach { internalEvent ->
             InternalEventItem(
                 event = internalEvent,
             )
@@ -65,8 +68,7 @@ fun ExploratoryRecordBlock(
 
         TimeLabelWithLine(
             event = events.first(),
-            isStart = false,
-            textSize = 16.sp
+            type = TimeLabelType.END,
         )
     }
 }
@@ -104,27 +106,38 @@ fun InternalEventItem(
     )
 
     if (isSub) {
-        TimeLabelWithLine(event, isStart = false)
+        TimeLabelWithLine(event, TimeLabelType.END)
     }
 }
 
 @Composable
 fun TimeLabelWithLine(
     event: InternalEvent,
-    isStart: Boolean = true,
-    textSize: TextUnit = 12.sp,
+    type: TimeLabelType = TimeLabelType.START, // 用于区分开始和结束时间
+    viewModel: RecordPageViewModel = viewModel()
 ) {
-//    TimeLabel(
-//        timeState = TimeState(
-//            eventId = event.id,
-//            isStart = isStart,
-//            eventType = event.type,
-//            initialTime = if (isStart) event.startTime else event.endTime,
-//        ),
-//        textSize = textSize
-//    )
-//
-//    if (!isStart) return
+    val initialTime =
+        (if (type == TimeLabelType.START) event.startTime else event.endTime) ?: return
+    val textSize = if (event.type == EventType.MAIN) 16.sp else 12.sp
+    val timeLabelState = TimeLabelState(
+        eventId = event.id,
+        eventType = event.type,
+        textSize = textSize,
+        labelType = type,
+        initialTime = initialTime,
+    )
+    Log.d(TAG, "TimeLabelWithLine（重组）: timeLabelState = $timeLabelState")
+
+    BusinessTimeLabel(
+        timeLabelState = timeLabelState,
+        onTimeSelected = {
+            // 在这里赋值才标准，如果用创建的 state 直接赋值，那在创建之外的选中场景就无法获取到 state 了
+            viewModel.currentTimeLabelState = it
+        }
+    )
+
+    // 如果是主题事件的结束时间，就不要显示下边的竖线了
+    if (event.type == EventType.MAIN && type == TimeLabelType.END) return
     VerticalLine()
 }
 

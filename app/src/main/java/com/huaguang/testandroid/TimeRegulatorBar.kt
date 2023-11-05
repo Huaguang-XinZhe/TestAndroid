@@ -33,7 +33,7 @@ fun TimeRegulatorBar(
 
         TimeAdjustIconButton(-1, R.drawable.minus)
 
-        IconButton(onClick = { viewModel.onHideButtonClick() }) {
+        IconButton(onClick = { viewModel.toggleBar() }) {
             Icon(
                 painter = painterResource(id = R.drawable.arrow_down),
                 contentDescription = null,

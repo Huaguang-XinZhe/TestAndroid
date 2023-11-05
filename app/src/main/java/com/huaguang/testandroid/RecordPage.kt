@@ -3,9 +3,6 @@ package com.huaguang.testandroid
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -18,22 +15,6 @@ import com.huaguang.testandroid.record_block.ExploratoryRecordBlock
 fun RecordPage(
     viewModel: RecordPageViewModel
 ) {
-    val events = viewModel.events
-    val selected = viewModel.recordBlockState.timeLabelSelected.value
-    val mainSelected = viewModel.recordBlockState.mainStartLabelSelected.value
-    val buttonsBarShow = remember { mutableStateOf(true) }
-    val regulatorBarShow = remember { mutableStateOf(false) }
-
-    LaunchedEffect(selected, mainSelected) {
-        if (selected || mainSelected) {
-            buttonsBarShow.value = false
-            regulatorBarShow.value = true
-        } else {
-            buttonsBarShow.value = true
-            regulatorBarShow.value = false
-        }
-    }
-
     ConstraintLayout(
         modifier = Modifier.fillMaxSize()
     ) {
@@ -45,7 +26,7 @@ fun RecordPage(
                     modifier = Modifier.constrainAs(itemRef) {
                         top.linkTo(parent.top, 15.dp)
                     },
-                    events = events
+                    events = viewModel.events
                 )
             } else {
                 // TODO: 展示块

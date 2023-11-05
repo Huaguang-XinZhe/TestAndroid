@@ -8,4 +8,6 @@ import com.huaguang.testandroid.record_block.CurrentType
 data class RecordPageState(
     val recordMode: MutableState<Boolean> = mutableStateOf(true),
     val currentType: MutableState<CurrentType?> = mutableStateOf(null),
+    val buttonsBarShow: MutableState<Boolean> = mutableStateOf(true),
+    val regulatorBarShow: MutableState<Boolean> = mutableStateOf(false),
 )

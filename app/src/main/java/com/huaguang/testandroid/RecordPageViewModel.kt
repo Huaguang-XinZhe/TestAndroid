@@ -1,5 +1,6 @@
 package com.huaguang.testandroid
 
+import android.util.Log
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateListOf
 import androidx.lifecycle.ViewModel
@@ -10,7 +11,7 @@ import com.huaguang.testandroid.input_field.InputState
 import com.huaguang.testandroid.record_block.CurrentType
 import com.huaguang.testandroid.record_block.EventType
 import com.huaguang.testandroid.record_block.InternalEvent
-import com.huaguang.testandroid.record_block.RecordBlockState
+import com.huaguang.testandroid.time_label.TimeLabelState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -23,7 +24,7 @@ import javax.inject.Inject
 @HiltViewModel
 class RecordPageViewModel @Inject constructor(
     val buttonsBarState: MutableState<ButtonsBarState>,
-    val recordBlockState: RecordBlockState,
+//    val recordBlockState: RecordBlockState,
     val inputState: InputState,
     private val timeCache: TimeCache,
     val pageState: RecordPageState,
@@ -32,6 +33,7 @@ class RecordPageViewModel @Inject constructor(
     val cursor = pageState.currentType
     val events = mutableStateListOf<InternalEvent>()
     private var job: Job? = null
+    var currentTimeLabelState: TimeLabelState? = null
 
     fun onMainStartClick() {
         inputState.show.value = true
@@ -71,11 +73,7 @@ class RecordPageViewModel @Inject constructor(
 
     fun onStopButtonClick() {
         buttonsBarState.value = ButtonsBarState.Default
-        recordBlockState.apply {
-            supplementButtonShow.value = false
-            timeLabelSelected.value = true
-        }
-        setJob()
+        // setJob()
 
         if (cursor.value != CurrentType.MAIN) {
             stopCurrentEvent()
@@ -97,18 +95,7 @@ class RecordPageViewModel @Inject constructor(
     
     fun onConfirmButtonClick(text: String) {
         inputState.show.value = false
-        recordBlockState.apply {
-            if (timeCache.index == 0) { // 主题事件下
-                supplementButtonShow.value = true // 只有主题事件在确认点击后才显示补计按钮
-                mainStartLabelSelected.value = true
-            } else {
-                intervalButtonShow.value = false
-                startTimeShow.value = true
-                timeLabelSelected.value = true
-            }
-            setJob()
-        }
-
+        toggleBar()
         updateName(text)
     }
 
@@ -179,10 +166,6 @@ class RecordPageViewModel @Inject constructor(
 
     private fun onMiddleButtonClick(type: EventType, startTime: LocalDateTime) {
         inputState.show.value = true
-        recordBlockState.apply {
-            intervalButtonShow.value = true
-            supplementButtonShow.value = false
-        }
 
         if (type == EventType.ADD) {
             buttonsBarState.value = ButtonsBarState.AddOverDisplay
@@ -208,13 +191,7 @@ class RecordPageViewModel @Inject constructor(
 
     private fun onMiddleButtonOverClick() {
         buttonsBarState.value = ButtonsBarState.AllDisplay
-        recordBlockState.apply {
-            supplementButtonShow.value = true
-            intervalButtonShow.value = false
-            endTimeShow.value = true
-            timeLabelSelected.value = true
-        }
-        setJob()
+        // setJob()
         cursor.value = CurrentType.MAIN
 
         stopCurrentEvent()
@@ -235,31 +212,40 @@ class RecordPageViewModel @Inject constructor(
         }
     }
 
-    fun onHideButtonClick() {
-        recordBlockState.apply {
-            startTimeShow.value = false
-            endTimeShow.value = false
-            timeLabelSelected.value = false
-            mainStartLabelSelected.value = false
-        }
+    fun onAdjustButtonClick(value: Long) {
+        if (currentTimeLabelState == null || currentTimeLabelState!!.isSelected.value.not()) return // 没选中，点击无效！
+
+        currentTimeLabelState!!.dynamicTime.value =
+            currentTimeLabelState!!.dynamicTime.value.plusMinutes(value)
+
+        onTimeUpdated(currentTimeLabelState!!)
     }
 
-    fun onAdjustButtonClick(value: Long) {
+    private fun onTimeUpdated(labelState: TimeLabelState) {
         job?.cancel()
-        setJob {
-            // TODO: 更新数据
-
+        job = viewModelScope.launch {
+            delay(1200) // 延迟 1.2 秒
+            Log.d(TAG, "onTimeUpdated: labelState = $labelState")
+            labelState.apply {
+                // 更新初始时间
+                initialTime = labelState.dynamicTime.value
+                // 取消选中
+                isSelected.value = false
+                // 隐藏（非主题事件）
+                isShow.value = eventType == EventType.MAIN
+                // 切换底部按钮栏
+                toggleBar()
+            }
             sharedState.toastMessage.value = "时间调整成功"
         }
     }
 
-    private fun setJob(action: (() -> Unit)? = null) {
-        job = viewModelScope.launch {
-            delay(1500) // 延迟一秒
-            action?.invoke()
-            onHideButtonClick()
-        }
+    /**
+     * regulatorBar 和 buttonsBar 切换函数
+     */
+    fun toggleBar() {
+        pageState.regulatorBarShow.value = pageState.regulatorBarShow.value.not()
+        pageState.buttonsBarShow.value = pageState.buttonsBarShow.value.not()
     }
-
 
 }
