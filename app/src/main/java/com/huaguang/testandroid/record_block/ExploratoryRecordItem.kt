@@ -17,6 +17,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -116,16 +117,19 @@ fun TimeLabelWithLine(
     type: TimeLabelType = TimeLabelType.START, // 用于区分开始和结束时间
     viewModel: RecordPageViewModel = viewModel()
 ) {
-    val initialTime =
-        (if (type == TimeLabelType.START) event.startTime else event.endTime) ?: return
+    val initialTime = if (type == TimeLabelType.START) event.startTime else event.endTime ?: return
     val textSize = if (event.type == EventType.MAIN) 16.sp else 12.sp
-    val timeLabelState = TimeLabelState(
-        eventId = event.id,
-        eventType = event.type,
-        textSize = textSize,
-        labelType = type,
-        initialTime = initialTime,
-    )
+
+    // 使用 remember 来保留 TimeLabelState 实例
+    val timeLabelState = remember(event.id, type) { // 用于标记唯一的 TimeLabelState（只要是同一个事件，同一种时间类型，就是同一个状态）
+        TimeLabelState( // 这里边有三个状态，如果不记住，那么重组的时候就会重置
+            eventId = event.id,
+            eventType = event.type,
+            textSize = textSize,
+            labelType = type,
+            initialTime = initialTime,
+        )
+    }
     Log.d(TAG, "TimeLabelWithLine（重组）: timeLabelState = $timeLabelState")
 
     BusinessTimeLabel(

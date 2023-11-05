@@ -36,6 +36,10 @@ fun BusinessTimeLabel(
         onTimeSelected(timeLabelState)
     }
 
+    if (timeLabelState.isSelected.value) {
+        onTimeSelected(timeLabelState) // 在选中的情况下，自动抛出 labelState，没选中不会抛
+    }
+
     val dynamicTime = timeLabelState.dynamicTime.value
     val timeString = remember(dynamicTime) { dynamicTime.format() }
 
