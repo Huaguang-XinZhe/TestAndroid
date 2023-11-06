@@ -10,8 +10,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.huaguang.testandroid.format
 import com.huaguang.testandroid.record_block.EventType
+import com.huaguang.testandroid.utils.format
 import com.huaguang.testandroid.widget.TimeLabel
 import java.time.LocalDateTime
 

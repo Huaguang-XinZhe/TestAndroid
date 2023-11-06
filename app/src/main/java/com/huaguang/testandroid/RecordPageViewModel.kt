@@ -12,6 +12,7 @@ import com.huaguang.testandroid.record_block.EventType
 import com.huaguang.testandroid.record_block.InternalEvent
 import com.huaguang.testandroid.time_label.TimeLabelState
 import com.huaguang.testandroid.time_label.TimeLabelType
+import com.huaguang.testandroid.utils.LimitedSizeSet
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -31,7 +32,7 @@ class RecordPageViewModel @Inject constructor(
 ) : ViewModel() {
     val cursor = pageState.currentType
     val events = mutableStateListOf<InternalEvent>()
-    private val timeLabelStates = mutableListOf<TimeLabelState>() // 可以添加更多的标签状态
+    private val timeLabelStates = LimitedSizeSet<TimeLabelState>(2) // 用于存储选中的时间标签状态
     private var timeLabelJobs = mutableListOf<Job>() // 存储对应的 Jobs
     // 是否执行共享逻辑的标志，只在 onTimeUpdated 方法内生效（在其内被重置）
     private var hasExecutedSharedLogic = false
@@ -245,7 +246,7 @@ class RecordPageViewModel @Inject constructor(
     fun onTimeSelected(labelState: TimeLabelState) {
         if (timeLabelStates.size > 1) {
             // 保存上一个时间标签的选中状态
-            timeLabelStates[timeLabelStates.lastIndex - 1] = timeLabelStates.last()
+            timeLabelStates.replaceFirst(timeLabelStates.last())
         }
         timeLabelStates.add(labelState) // 添加当前选中状态
         // 只要一选中，就显示调节器，隐藏按钮行（会触发整个页面重组，进而触发当前组件重组）

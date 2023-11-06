@@ -13,7 +13,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
-import com.huaguang.testandroid.dashBorder
+import com.huaguang.testandroid.utils.dashBorder
 
 @Composable
 fun Label(

@@ -10,7 +10,7 @@ import com.huaguang.testandroid.data.repositories.CategoryRepository
 import com.huaguang.testandroid.data.repositories.EventRepository
 import com.huaguang.testandroid.data.repositories.MainRepository
 import com.huaguang.testandroid.dtos.EventInput
-import com.huaguang.testandroid.getAdjustedDate
+import com.huaguang.testandroid.utils.getAdjustedDate
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch

@@ -29,10 +29,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.huaguang.testandroid.RecordPageViewModel
-import com.huaguang.testandroid.format
 import com.huaguang.testandroid.time_label.BusinessTimeLabel
 import com.huaguang.testandroid.time_label.TimeLabelState
 import com.huaguang.testandroid.time_label.TimeLabelType
+import com.huaguang.testandroid.utils.format
 import com.huaguang.testandroid.widget.Label
 import com.huaguang.testandroid.widget.LabelType
 import com.huaguang.testandroid.widget.LongPressOutlinedIconButton
