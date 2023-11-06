@@ -32,8 +32,16 @@ class RecordPageViewModel @Inject constructor(
 ) : ViewModel() {
     val cursor = pageState.currentType
     val events = mutableStateListOf<InternalEvent>()
-    private var job: Job? = null
-    var currentTimeLabelState: TimeLabelState? = null
+    // 上次选中的时间标签状态
+    private var lastTimeLabelState: TimeLabelState? = null
+    // 上次时间标签状态的协程
+    private var lastTimeLabelJob: Job? = null
+    // 当前选中的时间标签状态
+    private var currentTimeLabelState: TimeLabelState? = null
+    // 当前时间标签状态的协程
+    private var currentTimeLabelJob: Job? = null
+    // 是否执行共享逻辑的标志，只在 onTimeUpdated 方法内生效（在其内被重置）
+    private var hasExecutedSharedLogic = false
 
     fun onMainStartClick() {
         inputState.show.value = true
@@ -209,44 +217,113 @@ class RecordPageViewModel @Inject constructor(
         }
     }
 
+    /**
+     * 时间调整按钮点击回调
+     *
+     * 无论是当前时间标签还是上一个时间标签，只要选中就能调
+     */
     fun onAdjustButtonClick(value: Long) {
-        if (currentTimeLabelState == null || currentTimeLabelState!!.isSelected.value.not()) return // 没选中，点击无效！
-
-        currentTimeLabelState!!.dynamicTime.value =
-            currentTimeLabelState!!.dynamicTime.value.plusMinutes(value)
-
-        onTimeUpdated(currentTimeLabelState!!)
+        // 上个时间标签
+        if (lastTimeLabelState != null && lastTimeLabelState!!.isSelected.value) {
+            Log.d(TAG, "onAdjustButtonClick: lastTimeLabelState = $lastTimeLabelState")
+            adjustTime(lastTimeLabelState!!, value)
+        }
+        // 当前时间标签
+        if (currentTimeLabelState != null && currentTimeLabelState!!.isSelected.value) {
+            Log.d(TAG, "onAdjustButtonClick: currentTimeLabelState = $currentTimeLabelState")
+            adjustTime(currentTimeLabelState!!, value)
+        }
     }
 
+    /**
+     * 时间调整的具体逻辑，只要传入状态就能调
+     */
+    private fun adjustTime(labelState: TimeLabelState, value: Long) {
+        labelState.dynamicTime.value = labelState.dynamicTime.value.plusMinutes(value)
+        onTimeUpdated(labelState)
+    }
+
+    /**
+     * 时间调整后的回调
+     *
+     * 取消协程，新建一个，然后更新状态；
+     * 一次逻辑：切按钮栏、调节器栏，更新数据库，弹 toast
+     */
     private fun onTimeUpdated(labelState: TimeLabelState) {
-        job?.cancel()
-        job = viewModelScope.launch {
+        // 取消之前的 jobs
+        lastTimeLabelJob?.cancel()
+        currentTimeLabelJob?.cancel()
+
+        // 重置共享逻辑执行标志
+        hasExecutedSharedLogic = false
+
+        // 创建新的 jobs
+        lastTimeLabelJob = viewModelScope.launch {
             delay(1200) // 延迟 1.2 秒
-            Log.d(TAG, "onTimeUpdated: labelState = $labelState")
-            labelState.apply {
-                // 更新初始时间
-                initialTime = labelState.dynamicTime.value
-                // 取消选中
-                isSelected.value = false
-                // 隐藏（非主题事件）
-                isShow.value = eventType == EventType.MAIN
-                // 切换底部按钮栏
-                toggleBar()
+            lastTimeLabelState?.let {
+                updateLabelState(it)
+                executeSharedLogicIfNeeded()
             }
-            // 如果时间变化了，才显示 toast
-            if (labelState.dynamicTime.value != labelState.initialTime) {
-                sharedState.toastMessage.value = "时间调整成功"
+        }
+        currentTimeLabelJob = viewModelScope.launch {
+            delay(1200) // 延迟 1.2 秒
+            currentTimeLabelState?.let {
+                updateLabelState(it)
+                executeSharedLogicIfNeeded()
             }
         }
     }
+
+
+    private fun updateLabelState(timeLabelState: TimeLabelState) {
+        timeLabelState.apply {
+            // 更新初始时间
+            initialTime = timeLabelState.dynamicTime.value
+            // 取消选中
+            isSelected.value = false
+            // 隐藏（非主题事件）
+            isShow.value = eventType == EventType.MAIN
+        }
+    }
+
+    private fun executeSharedLogicIfNeeded() {
+        if (!hasExecutedSharedLogic) {
+            hasExecutedSharedLogic = true
+            // 执行只应该发生一次的逻辑
+            toggleBar()
+            updateDatabase() // 更新数据库
+            sharedState.toastMessage.value = "时间调整成功"
+        }
+    }
+
+    /**
+     * 更新数据库的逻辑
+     */
+    private fun updateDatabase() {
+        // 更新数据库的代码
+    }
+
 
     /**
      * regulatorBar 和 buttonsBar 切换函数
      */
     fun toggleBar() {
-        Log.d(TAG, "toggleBar: 执行！")
         pageState.regulatorBarShow.value = pageState.regulatorBarShow.value.not()
         pageState.buttonsBarShow.value = pageState.buttonsBarShow.value.not()
+    }
+
+    /**
+     * 时间标签选中回调
+     */
+    fun onTimeSelected(labelState: TimeLabelState) {
+        lastTimeLabelState = currentTimeLabelState // 保存上一个选中的时间标签状态
+//        // 取消上个时间标签的选中状态
+//        lastTimeLabelState?.isSelected?.value = false
+        // 在这里赋值才标准，如果用创建的 state 直接赋值，那在创建之外的选中场景就无法获取到 state 了
+        currentTimeLabelState = labelState
+        // 只要一选中，就显示调节器，隐藏按钮行（会触发整个页面重组，进而触发当前组件重组）
+        pageState.regulatorBarShow.value = true
+        pageState.buttonsBarShow.value = false
     }
 
 }

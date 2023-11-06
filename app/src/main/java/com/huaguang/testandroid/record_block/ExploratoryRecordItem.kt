@@ -1,6 +1,5 @@
 package com.huaguang.testandroid.record_block
 
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -30,7 +29,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.huaguang.testandroid.RecordPageViewModel
-import com.huaguang.testandroid.TAG
 import com.huaguang.testandroid.format
 import com.huaguang.testandroid.time_label.BusinessTimeLabel
 import com.huaguang.testandroid.time_label.TimeLabelState
@@ -133,12 +131,9 @@ fun TimeLabelWithLine(
 
     BusinessTimeLabel(
         timeLabelState = timeLabelState,
-        onTimeSelected = {
-            // 在这里赋值才标准，如果用创建的 state 直接赋值，那在创建之外的选中场景就无法获取到 state 了
-            viewModel.currentTimeLabelState = it
-            Log.d(TAG, "TimeLabelWithLine: onTimeSelected 执行！")
-            viewModel.toggleBar() // 只要一选中，就切换按钮栏的显示状态（会触发整个页面重组，进而触发当前组件重组）
-        }
+        onTimeSelected = { labelState ->
+            viewModel.onTimeSelected(labelState)
+        },
     )
 
     // 如果是主题事件的结束时间，就不要显示下边的竖线了
