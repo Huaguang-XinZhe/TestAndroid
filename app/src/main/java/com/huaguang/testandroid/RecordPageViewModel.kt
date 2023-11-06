@@ -70,10 +70,8 @@ class RecordPageViewModel @Inject constructor(
         onMiddleButtonOverClick()
     }
 
-
     fun onStopButtonClick() {
         buttonsBarState.value = ButtonsBarState.Default
-        // setJob()
 
         if (cursor.value != CurrentType.MAIN) {
             stopCurrentEvent()
@@ -95,8 +93,8 @@ class RecordPageViewModel @Inject constructor(
     
     fun onConfirmButtonClick(text: String) {
         inputState.show.value = false
-        toggleBar()
         updateName(text)
+        currentTimeLabelState?.let { onTimeUpdated(it) } // 确认后 1.2 秒自动更新状态（针对不调整的情境）
     }
 
     fun onSButtonClick() {
@@ -191,7 +189,6 @@ class RecordPageViewModel @Inject constructor(
 
     private fun onMiddleButtonOverClick() {
         buttonsBarState.value = ButtonsBarState.AllDisplay
-        // setJob()
         cursor.value = CurrentType.MAIN
 
         stopCurrentEvent()
@@ -236,7 +233,10 @@ class RecordPageViewModel @Inject constructor(
                 // 切换底部按钮栏
                 toggleBar()
             }
-            sharedState.toastMessage.value = "时间调整成功"
+            // 如果时间变化了，才显示 toast
+            if (labelState.dynamicTime.value != labelState.initialTime) {
+                sharedState.toastMessage.value = "时间调整成功"
+            }
         }
     }
 
@@ -244,6 +244,7 @@ class RecordPageViewModel @Inject constructor(
      * regulatorBar 和 buttonsBar 切换函数
      */
     fun toggleBar() {
+        Log.d(TAG, "toggleBar: 执行！")
         pageState.regulatorBarShow.value = pageState.regulatorBarShow.value.not()
         pageState.buttonsBarShow.value = pageState.buttonsBarShow.value.not()
     }

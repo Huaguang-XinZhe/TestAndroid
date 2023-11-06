@@ -1,16 +1,15 @@
 package com.huaguang.testandroid.time_label
 
-import android.util.Log
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.huaguang.testandroid.TAG
 import com.huaguang.testandroid.format
 import com.huaguang.testandroid.record_block.EventType
 import com.huaguang.testandroid.widget.TimeLabel
@@ -27,23 +26,36 @@ import java.time.LocalDateTime
 @Composable
 fun BusinessTimeLabel(
     timeLabelState: TimeLabelState,
+    isShowSelect: Boolean = true, // 控制是否一显示就选中
     onTimeSelected: (TimeLabelState) -> Unit
 ) {
-    if (timeLabelState.isShow.value.not()) return
+    if (timeLabelState.isShow.value.not()) return // 下边的代码执行，就代表已经显示了
+
+    if (!isShowSelect) { // 如果没有开启一显示就选中，那在一开始就将选中状态置为 false
+        timeLabelState.isSelected.value = false
+    }
 
     val onSelected: () -> Unit = {
         timeLabelState.isSelected.value = true
         onTimeSelected(timeLabelState)
     }
 
-    if (timeLabelState.isSelected.value) {
-        onTimeSelected(timeLabelState) // 在选中的情况下，自动抛出 labelState，没选中不会抛
-    }
+    // 风险代码，可能导致无限循环！
+    // 这段代码会在当前组件重组时执行，如果在 onTimeSelected 内部发生了某些状态改变，又导致该组件重组，就会导致无限循环。
+    // 应该把它放在副作用中，仅当时间标签的选中状态改变时才执行。
+//    if (timeLabelState.isSelected.value) { // 默认是选中的，后面状态可能会改变
+//        onTimeSelected(timeLabelState) // 在选中的情况下，自动抛出 labelState，没选中不会抛
+//    }
 
     val dynamicTime = timeLabelState.dynamicTime.value
     val timeString = remember(dynamicTime) { dynamicTime.format() }
 
-    Log.d(TAG, "BusinessTimeLabel: timeString = $timeString")
+    LaunchedEffect(timeLabelState.isSelected.value) {
+        if (timeLabelState.isSelected.value) {
+            onTimeSelected(timeLabelState)
+        }
+    }
+
     TimeLabel(
         timeString = timeString,
         textSize = timeLabelState.textSize,

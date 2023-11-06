@@ -130,19 +130,22 @@ fun TimeLabelWithLine(
             initialTime = initialTime,
         )
     }
-    Log.d(TAG, "TimeLabelWithLine（重组）: timeLabelState = $timeLabelState")
 
     BusinessTimeLabel(
         timeLabelState = timeLabelState,
         onTimeSelected = {
             // 在这里赋值才标准，如果用创建的 state 直接赋值，那在创建之外的选中场景就无法获取到 state 了
             viewModel.currentTimeLabelState = it
+            Log.d(TAG, "TimeLabelWithLine: onTimeSelected 执行！")
+            viewModel.toggleBar() // 只要一选中，就切换按钮栏的显示状态（会触发整个页面重组，进而触发当前组件重组）
         }
     )
 
     // 如果是主题事件的结束时间，就不要显示下边的竖线了
     if (event.type == EventType.MAIN && type == TimeLabelType.END) return
-    VerticalLine()
+    if (timeLabelState.isShow.value) { // 伴随每个时间的显示状态
+        VerticalLine()
+    }
 }
 
 @Composable
