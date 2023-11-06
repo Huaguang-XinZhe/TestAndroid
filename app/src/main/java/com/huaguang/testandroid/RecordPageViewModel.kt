@@ -24,7 +24,6 @@ import javax.inject.Inject
 @HiltViewModel
 class RecordPageViewModel @Inject constructor(
     val buttonsBarState: MutableState<ButtonsBarState>,
-//    val recordBlockState: RecordBlockState,
     val inputState: InputState,
     private val timeCache: TimeCache,
     val pageState: RecordPageState,
@@ -32,16 +31,14 @@ class RecordPageViewModel @Inject constructor(
 ) : ViewModel() {
     val cursor = pageState.currentType
     val events = mutableStateListOf<InternalEvent>()
-    // 上次选中的时间标签状态
-    private var lastTimeLabelState: TimeLabelState? = null
-    // 上次时间标签状态的协程
-    private var lastTimeLabelJob: Job? = null
-    // 当前选中的时间标签状态
-    private var currentTimeLabelState: TimeLabelState? = null
-    // 当前时间标签状态的协程
-    private var currentTimeLabelJob: Job? = null
+    private val timeLabelStates = mutableListOf<TimeLabelState>() // 可以添加更多的标签状态
+    private var timeLabelJobs = mutableListOf<Job>() // 存储对应的 Jobs
     // 是否执行共享逻辑的标志，只在 onTimeUpdated 方法内生效（在其内被重置）
     private var hasExecutedSharedLogic = false
+
+    companion object {
+        private const val TAG = "RecordPageViewModel"
+    }
 
     fun onMainStartClick() {
         inputState.show.value = true
@@ -103,7 +100,7 @@ class RecordPageViewModel @Inject constructor(
         inputState.show.value = false
         updateName(text)
         // 时间不调整也会自动更新选中状态，来源于这里！！！
-        currentTimeLabelState?.let { onTimeUpdated() } // 确认后 1.2 秒自动更新状态（针对不调整的情境）
+        onTimeUpdated() // 确认后 1.2 秒自动更新状态（针对不调整的情境）
     }
 
     fun onSButtonClick() {
@@ -232,13 +229,13 @@ class RecordPageViewModel @Inject constructor(
      * 无论是当前时间标签还是上一个时间标签，只要选中就能调
      */
     fun onAdjustButtonClick(value: Long) {
-        // 上个时间标签
-        if (lastTimeLabelState != null && lastTimeLabelState!!.isSelected.value) {
-            adjustTime(lastTimeLabelState!!, value)
-        }
-        // 当前时间标签
-        if (currentTimeLabelState != null && currentTimeLabelState!!.isSelected.value) {
-            adjustTime(currentTimeLabelState!!, value)
+        // 遍历所有时间标签状态
+        timeLabelStates.forEach { labelState ->
+            // 检查当前标签是否被选中
+            if (labelState.isSelected.value) {
+                // 如果选中，则调整时间
+                adjustTime(labelState, value)
+            }
         }
     }
 
@@ -246,28 +243,36 @@ class RecordPageViewModel @Inject constructor(
      * 时间标签选中回调
      */
     fun onTimeSelected(labelState: TimeLabelState) {
-        lastTimeLabelState = currentTimeLabelState // 保存上一个选中的时间标签状态
-        // 在这里赋值才标准，如果用创建的 state 直接赋值，那在创建之外的选中场景就无法获取到 state 了
-        currentTimeLabelState = labelState
+        if (timeLabelStates.size > 1) {
+            // 保存上一个时间标签的选中状态
+            timeLabelStates[timeLabelStates.lastIndex - 1] = timeLabelStates.last()
+        }
+        timeLabelStates.add(labelState) // 添加当前选中状态
         // 只要一选中，就显示调节器，隐藏按钮行（会触发整个页面重组，进而触发当前组件重组）
         pageState.regulatorBarShow.value = true
         pageState.buttonsBarShow.value = false
         // 启动一个判断回调
-        onJudgeSelected(labelState)
+        onJudgeSelected()
     }
 
     /**
      * 时间标签选中后的判断回调。
      *
-     * 用户两个时间标签交互的情景。
+     * 用于两个时间标签交互的情景。
      * 对于上一个选中的时间标签，什么时候保持选中状态，什么时候取消选中状态。
      */
-    private fun onJudgeSelected(labelState: TimeLabelState) {
-        // 如果上一个选中的时间标签状态不为空，且当前选中的时间标签状态不为空，且两个时间标签状态不是同一个，那就要判断是否保持选中状态
-        if (lastTimeLabelState != null && currentTimeLabelState != null && lastTimeLabelState != currentTimeLabelState) {
-            // 如果不应该保持选中状态，就取消上一个选中的时间标签状态
-            if (!shouldKeepSelected(lastTimeLabelState!!, currentTimeLabelState!!)) {
-                lastTimeLabelState!!.isSelected.value = false
+    private fun onJudgeSelected() {
+        // 获取所有选中的时间标签
+        val selectedLabels = timeLabelStates.filter { it.isSelected.value }
+
+        // 只有在有两个及以上的时间标签被选中时，才需要进一步判断
+        if (selectedLabels.size > 1) {
+            // 获取最后两个被选中的时间标签
+            val (lastSelected, currentSelected) = selectedLabels.takeLast(2)
+
+            // 如果不应该保持选中状态，取消上一个时间标签的选中状态
+            if (!shouldKeepSelected(lastSelected, currentSelected)) {
+                lastSelected.isSelected.value = false
             }
         }
     }
@@ -287,30 +292,25 @@ class RecordPageViewModel @Inject constructor(
      * 一次逻辑：切按钮栏、调节器栏，更新数据库，弹 toast
      */
     private fun onTimeUpdated() {
-        // 取消之前的 jobs
-        lastTimeLabelJob?.cancel()
-        currentTimeLabelJob?.cancel()
+        // 取消之前的所有 jobs
+        timeLabelJobs.forEach { it.cancel() }
+        timeLabelJobs.clear()
 
         // 重置共享逻辑执行标志
         hasExecutedSharedLogic = false
 
-        // 创建新的 jobs
-        lastTimeLabelJob = viewModelScope.launch {
-            delay(1200) // 延迟 1.2 秒
-            lastTimeLabelState?.let {
-                updateLabelState(it)
-                executeSharedLogicIfNeeded(it)
-            }
-        }
-        currentTimeLabelJob = viewModelScope.launch {
-            delay(1200) // 延迟 1.2 秒
-            currentTimeLabelState?.let {
-                updateLabelState(it)
-                executeSharedLogicIfNeeded(it)
+        // 创建新的 jobs（为每个状态创建新的 job）
+        timeLabelStates.forEach { labelState ->
+            labelState.let { state ->
+                val job = viewModelScope.launch {
+                    delay(1200) // 延迟 1.2 秒
+                    updateLabelState(state)
+                    executeSharedLogicIfNeeded(state)
+                }
+                timeLabelJobs.add(job) // 将新建的 job 添加到列表中
             }
         }
     }
-
 
     private fun updateLabelState(timeLabelState: TimeLabelState) {
         timeLabelState.apply {
@@ -343,10 +343,6 @@ class RecordPageViewModel @Inject constructor(
      */
     private fun updateDatabase() {
         // 更新数据库的代码
-    }
-
-    companion object {
-        private const val TAG = "RecordPageViewModel"
     }
 
     /**
