@@ -25,7 +25,9 @@ data class InternalEvent(
 enum class EventType {
     MAIN,
     ADD,
-    INSERT,
+    INSERT;
+
+    fun isSub() = this != MAIN
 }
 
 // 全局性的标志，依情境而变，不伴随每个事件

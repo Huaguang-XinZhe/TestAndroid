@@ -124,7 +124,7 @@ fun TimeLabelWithLine(
             eventId = event.id,
             eventType = event.type,
             textSize = textSize,
-            labelType = type,
+            type = type,
             initialTime = initialTime,
         )
     }

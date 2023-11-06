@@ -13,7 +13,7 @@ import java.time.LocalDateTime
  * @param eventId 事件 id
  * @param eventType 事件类型
  * @param textSize 文字大小
- * @param labelType 标签类型（开始、结束）
+ * @param type 标签类型（开始、结束）
  * @param initialTime 初始时间
  * @param dynamicTime 动态时间（可变）
  * @param isShow 是否显示
@@ -23,7 +23,7 @@ data class TimeLabelState(
     val eventId: Long,
     val eventType: EventType,
     val textSize: TextUnit = 12.sp,
-    val labelType: TimeLabelType,
+    val type: TimeLabelType,
     var initialTime: LocalDateTime,
     val dynamicTime: MutableState<LocalDateTime> = mutableStateOf(initialTime),
     val isShow: MutableState<Boolean> = mutableStateOf(true), // 默认显示

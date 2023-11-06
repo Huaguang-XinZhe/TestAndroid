@@ -1,6 +1,5 @@
 package com.huaguang.testandroid
 
-import android.util.Log
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateListOf
 import androidx.lifecycle.ViewModel
@@ -12,6 +11,7 @@ import com.huaguang.testandroid.record_block.CurrentType
 import com.huaguang.testandroid.record_block.EventType
 import com.huaguang.testandroid.record_block.InternalEvent
 import com.huaguang.testandroid.time_label.TimeLabelState
+import com.huaguang.testandroid.time_label.TimeLabelType
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -102,7 +102,8 @@ class RecordPageViewModel @Inject constructor(
     fun onConfirmButtonClick(text: String) {
         inputState.show.value = false
         updateName(text)
-        currentTimeLabelState?.let { onTimeUpdated(it) } // 确认后 1.2 秒自动更新状态（针对不调整的情境）
+        // 时间不调整也会自动更新选中状态，来源于这里！！！
+        currentTimeLabelState?.let { onTimeUpdated() } // 确认后 1.2 秒自动更新状态（针对不调整的情境）
     }
 
     fun onSButtonClick() {
@@ -218,6 +219,14 @@ class RecordPageViewModel @Inject constructor(
     }
 
     /**
+     * regulatorBar 和 buttonsBar 切换函数
+     */
+    fun toggleBar() {
+        pageState.regulatorBarShow.value = pageState.regulatorBarShow.value.not()
+        pageState.buttonsBarShow.value = pageState.buttonsBarShow.value.not()
+    }
+
+    /**
      * 时间调整按钮点击回调
      *
      * 无论是当前时间标签还是上一个时间标签，只要选中就能调
@@ -225,13 +234,41 @@ class RecordPageViewModel @Inject constructor(
     fun onAdjustButtonClick(value: Long) {
         // 上个时间标签
         if (lastTimeLabelState != null && lastTimeLabelState!!.isSelected.value) {
-            Log.d(TAG, "onAdjustButtonClick: lastTimeLabelState = $lastTimeLabelState")
             adjustTime(lastTimeLabelState!!, value)
         }
         // 当前时间标签
         if (currentTimeLabelState != null && currentTimeLabelState!!.isSelected.value) {
-            Log.d(TAG, "onAdjustButtonClick: currentTimeLabelState = $currentTimeLabelState")
             adjustTime(currentTimeLabelState!!, value)
+        }
+    }
+
+    /**
+     * 时间标签选中回调
+     */
+    fun onTimeSelected(labelState: TimeLabelState) {
+        lastTimeLabelState = currentTimeLabelState // 保存上一个选中的时间标签状态
+        // 在这里赋值才标准，如果用创建的 state 直接赋值，那在创建之外的选中场景就无法获取到 state 了
+        currentTimeLabelState = labelState
+        // 只要一选中，就显示调节器，隐藏按钮行（会触发整个页面重组，进而触发当前组件重组）
+        pageState.regulatorBarShow.value = true
+        pageState.buttonsBarShow.value = false
+        // 启动一个判断回调
+        onJudgeSelected(labelState)
+    }
+
+    /**
+     * 时间标签选中后的判断回调。
+     *
+     * 用户两个时间标签交互的情景。
+     * 对于上一个选中的时间标签，什么时候保持选中状态，什么时候取消选中状态。
+     */
+    private fun onJudgeSelected(labelState: TimeLabelState) {
+        // 如果上一个选中的时间标签状态不为空，且当前选中的时间标签状态不为空，且两个时间标签状态不是同一个，那就要判断是否保持选中状态
+        if (lastTimeLabelState != null && currentTimeLabelState != null && lastTimeLabelState != currentTimeLabelState) {
+            // 如果不应该保持选中状态，就取消上一个选中的时间标签状态
+            if (!shouldKeepSelected(lastTimeLabelState!!, currentTimeLabelState!!)) {
+                lastTimeLabelState!!.isSelected.value = false
+            }
         }
     }
 
@@ -240,7 +277,7 @@ class RecordPageViewModel @Inject constructor(
      */
     private fun adjustTime(labelState: TimeLabelState, value: Long) {
         labelState.dynamicTime.value = labelState.dynamicTime.value.plusMinutes(value)
-        onTimeUpdated(labelState)
+        onTimeUpdated()
     }
 
     /**
@@ -249,7 +286,7 @@ class RecordPageViewModel @Inject constructor(
      * 取消协程，新建一个，然后更新状态；
      * 一次逻辑：切按钮栏、调节器栏，更新数据库，弹 toast
      */
-    private fun onTimeUpdated(labelState: TimeLabelState) {
+    private fun onTimeUpdated() {
         // 取消之前的 jobs
         lastTimeLabelJob?.cancel()
         currentTimeLabelJob?.cancel()
@@ -262,14 +299,14 @@ class RecordPageViewModel @Inject constructor(
             delay(1200) // 延迟 1.2 秒
             lastTimeLabelState?.let {
                 updateLabelState(it)
-                executeSharedLogicIfNeeded()
+                executeSharedLogicIfNeeded(it)
             }
         }
         currentTimeLabelJob = viewModelScope.launch {
             delay(1200) // 延迟 1.2 秒
             currentTimeLabelState?.let {
                 updateLabelState(it)
-                executeSharedLogicIfNeeded()
+                executeSharedLogicIfNeeded(it)
             }
         }
     }
@@ -286,11 +323,16 @@ class RecordPageViewModel @Inject constructor(
         }
     }
 
-    private fun executeSharedLogicIfNeeded() {
+    /**
+     * 这个方法在 onTimeUpdated 方法的作用域内只会执行一次
+     */
+    private fun executeSharedLogicIfNeeded(labelState: TimeLabelState) {
         if (!hasExecutedSharedLogic) {
             hasExecutedSharedLogic = true
             // 执行只应该发生一次的逻辑
             toggleBar()
+            // 下边的逻辑，如果时间没有调整，就退出
+            if (labelState.initialTime == labelState.dynamicTime.value) return
             updateDatabase() // 更新数据库
             sharedState.toastMessage.value = "时间调整成功"
         }
@@ -303,27 +345,29 @@ class RecordPageViewModel @Inject constructor(
         // 更新数据库的代码
     }
 
-
-    /**
-     * regulatorBar 和 buttonsBar 切换函数
-     */
-    fun toggleBar() {
-        pageState.regulatorBarShow.value = pageState.regulatorBarShow.value.not()
-        pageState.buttonsBarShow.value = pageState.buttonsBarShow.value.not()
+    companion object {
+        private const val TAG = "RecordPageViewModel"
     }
 
     /**
-     * 时间标签选中回调
+     * 时间标签是否选中的具体判断逻辑。
+     *
+     * 如果前后选中的两个时间标签的类型是：
+     * 1. “两个结尾 + 一个主一个子”；
+     * 2. “两个开头 + 一个主一个子”；
+     * 3. “两个子，一个开头一个结尾”；
+     * 那么就应该保持选中状态。
      */
-    fun onTimeSelected(labelState: TimeLabelState) {
-        lastTimeLabelState = currentTimeLabelState // 保存上一个选中的时间标签状态
-//        // 取消上个时间标签的选中状态
-//        lastTimeLabelState?.isSelected?.value = false
-        // 在这里赋值才标准，如果用创建的 state 直接赋值，那在创建之外的选中场景就无法获取到 state 了
-        currentTimeLabelState = labelState
-        // 只要一选中，就显示调节器，隐藏按钮行（会触发整个页面重组，进而触发当前组件重组）
-        pageState.regulatorBarShow.value = true
-        pageState.buttonsBarShow.value = false
-    }
+    private fun shouldKeepSelected(firstLabel: TimeLabelState, secondLabel: TimeLabelState): Boolean {
+        val isBothEnds = firstLabel.type == TimeLabelType.END && secondLabel.type == TimeLabelType.END
+        val isBothStarts = firstLabel.type == TimeLabelType.START && secondLabel.type == TimeLabelType.START
+        val isOneMainOneSub = firstLabel.eventType != secondLabel.eventType
+        val isSubStartAndEnd = firstLabel.eventType.isSub() && secondLabel.eventType.isSub() &&
+                ((firstLabel.type == TimeLabelType.START && secondLabel.type == TimeLabelType.END) ||
+                        (firstLabel.type == TimeLabelType.END && secondLabel.type == TimeLabelType.START))
 
+        return (isBothEnds && isOneMainOneSub) ||
+                (isBothStarts && isOneMainOneSub) ||
+                isSubStartAndEnd
+    }
 }

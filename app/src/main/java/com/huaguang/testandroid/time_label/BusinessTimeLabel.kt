@@ -85,13 +85,13 @@ fun SomeContainer() {
         listOf(
             TimeLabelState(
                 eventType = EventType.MAIN,
-                labelType = TimeLabelType.START,
+                type = TimeLabelType.START,
                 eventId = 1L,
                 initialTime = LocalDateTime.now(),
             ),
             TimeLabelState(
                 eventType = EventType.MAIN,
-                labelType = TimeLabelType.END,
+                type = TimeLabelType.END,
                 eventId = 1L,
                 initialTime = LocalDateTime.now().plusHours(1),
             )
